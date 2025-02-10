@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Bird;
+use App\Entity\LocationHistory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -90,18 +91,53 @@ class BirdController extends AbstractController
         return $this->json(['message' => 'Locations updated successfully']);
     }
 
-    #[Route('/bird/{gpsId}/location', name: 'get_location', methods: ['GET'])]
-    public function getLocation(string $gpsId): JsonResponse
+    #[Route('/bird/{id}/location', name: 'get_last_location', methods: ['GET'])]
+    public function getLastLocation(int $id): JsonResponse
     {
-        $bird = $this->entityManager->getRepository(Bird::class)->findOneBy(['gpsId' => $gpsId]);
+        $bird = $this->entityManager->getRepository(Bird::class)->find($id);
 
         if (!$bird) {
-            return $this->json(['error' => 'Bird not found'], Response::HTTP_NOT_FOUND);
+            return $this->json(['error' => 'Bird not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $lastLocation = $this->entityManager->getRepository(LocationHistory::class)->findOneBy(
+            ['bird' => $bird],
+            ['timestamp' => 'DESC']
+        );
+
+        if (!$lastLocation) {
+            return $this->json(['error' => 'No location history found for this bird'], JsonResponse::HTTP_NOT_FOUND);
         }
 
         return $this->json([
-            'latitude' => $bird->getLatitude(),
-            'longitude' => $bird->getLongitude(),
+            'latitude' => $lastLocation->getLatitude(),
+            'longitude' => $lastLocation->getLongitude(),
+            'timestamp' => $lastLocation->getTimestamp()->format('Y-m-d H:i:s'),
         ]);
+    }
+
+    #[Route('/bird/{id}/path', name: 'get_bird_path', methods: ['GET'])]
+    public function getBirdPath(int $id): JsonResponse
+    {
+        $bird = $this->entityManager->getRepository(Bird::class)->find($id);
+
+        if (!$bird) {
+            return $this->json(['error' => 'Bird not found'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $locations = $this->entityManager->getRepository(LocationHistory::class)->findBy(
+            ['bird' => $bird],
+            ['timestamp' => 'ASC'] 
+        );
+
+        $response = array_map(function (LocationHistory $location) {
+            return [
+                'latitude' => $location->getLatitude(),
+                'longitude' => $location->getLongitude(),
+                'timestamp' => $location->getTimestamp()->format('Y-m-d H:i:s'),
+            ];
+        }, $locations);
+
+        return $this->json($response);
     }
 }

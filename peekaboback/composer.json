@@ -11,11 +11,15 @@
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/doctrine-migrations-bundle": "^3.3",
         "doctrine/orm": "^2.20",
+        "lexik/jwt-authentication-bundle": "^2.21",
+        "nelmio/api-doc-bundle": "^4.34",
         "symfony/console": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "5.4.*",
+        "symfony/monolog-bundle": "^3.10",
         "symfony/runtime": "5.4.*",
+        "symfony/security-bundle": "5.4.*",
         "symfony/yaml": "5.4.*"
     },
     "config": {
@@ -68,6 +72,7 @@
         }
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.7",
         "symfony/maker-bundle": "^1.50"
     }
 }
