@@ -1,0 +1,187 @@
+/* Define root variables for consistency */
+:root {
+  --primary-color: #007FFF;
+  --secondary-color: #f0f8ff;
+  --nav-color: #005BBB;
+  --text-color: white;
+  --border-color: var(--primary-color);
+  --background-light: #ffffff;
+  --background-dark: #242424;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color: rgba(0, 0, 0, 0.87);
+  background-color: var(--background-light);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global styles */
+body {
+  margin-left: 40px;
+  margin-right: 40px;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--secondary-color);
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Main content area */
+main {
+  padding: 1rem;
+  min-height: 100vh;
+}
+
+
+/* Header */
+header {
+  background: var(--primary-color);
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-color);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chatbot-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 1rem;
+  border-radius: 5px;
+}
+
+.exatitle {
+  font-size: 48px;
+  color: var(--text-color);
+}
+
+.title {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 1px solid black;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+
+/* Navigation */
+nav {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: var(--nav-color);
+  padding: 0.5rem 0;
+}
+
+nav a {
+  color: var(--text-color);
+  font-weight: bold;
+  margin: 0 1rem;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+
+
+/* Footer */
+footer {
+  background: var(--primary-color);
+  color: var(--text-color);
+  text-align: center;
+  padding: 1rem 0;
+  width: 100%;
+  position: relative;
+  bottom: 0;
+}
+
+/* Links */
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #535bf2;
+}
+/* Buttons */
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: 1px solid black;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+.menu {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  padding: 2em;
+  background: var(--background-light);
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+/* Card component */
+.card {
+  padding: 2em;
+  background: var(--background-light);
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive styles */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: #ffffff;
+    background-color: var(--background-dark);
+  }
+
+  a:hover {
+    color: #747bff;
+  }
+
+  button {
+    background-color: #333;
+  }
+}
