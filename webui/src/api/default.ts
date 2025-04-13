@@ -20,7 +20,7 @@ import type {
   PostLoginBody,
   PostRegister201,
   PostRegisterBody
-} from './ChatbotService.schemas';
+} from './peekaboo_methods.schemas';
 
 
 
