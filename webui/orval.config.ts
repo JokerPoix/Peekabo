@@ -3,7 +3,7 @@ module.exports = {
     input: './schemas/openapi.yaml',
     output: {
       mode: 'tags',
-      target: 'src/api/ChatbotService.ts',
+      target: 'src/api/peekaboo_methods.ts',
       client: 'axios'
     }
   }
