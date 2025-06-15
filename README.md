@@ -102,7 +102,7 @@ IoT-->>FrontEnd (Mobile): Notifcation de scan du QR Code ??
 Web  Interface  Pro->>+Backend: Accède au Profil du propriétaire de l'oiseau
 Backend-->>FrontEnd (Mobile): Avertie le propriétaire de l'oiseau
 ```
-Le Vétérinaire appelle l'utilisateur ou notifiaction sur le QR Code lors du SCan par l'User Lambda.
+Le Vétérinaire appelle l'utilisateur ou notification sur le QR Code lors du scan par l'User Lambda.
 L' utlisateur va récupérer son oiseau.
 
 ### Specifications API (Généré par gpt4o)
