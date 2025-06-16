@@ -32,10 +32,12 @@ security:
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
         main:
+            pattern: ^/
             lazy: true
             provider: app_user_provider
             stateless: true
-            jwt: ~  # Utilisation du JWT pour les endpoints protégés
+            jwt: ~
+
 
     # Règles d'accès
     access_control:
@@ -70,6 +72,7 @@ when@test:
                     failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
             main:
+                pattern: ^/
                 lazy: true
                 provider: app_user_provider
                 stateless: true
@@ -77,4 +80,7 @@ when@test:
 
         access_control:
             - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-            - { path: ^/api, roles: ROLE_USER }
+            - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
+            - { path: ^/me, roles: IS_AUTHENTICATED_FULLY }
+
+

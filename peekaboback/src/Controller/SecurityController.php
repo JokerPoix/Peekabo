@@ -6,7 +6,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 
 
 class SecurityController extends AbstractController
@@ -18,19 +20,6 @@ class SecurityController extends AbstractController
     {
         $this->passwordHasher = $passwordHasher;
         $this->entityManager = $entityManager;
-    }
-
-    #[Route('/login', name: 'app_login', methods: ['POST'])]
-    public function login(): JsonResponse
-    {
-        $user = $this->getUser();
-        if (!$user) {
-            return $this->json(['error' => 'Invalid credentials'], JsonResponse::HTTP_UNAUTHORIZED);
-        }
-
-        return $this->json([
-            'token' => $request->attributes->get('_jwt'),
-        ]);
     }
 
     #[Route('/register', name: 'app_register', methods: ['POST'])]
@@ -52,4 +41,21 @@ class SecurityController extends AbstractController
 
         return new JsonResponse(['message' => 'User registered successfully'], 201);
     }
+    #[Route('/me', name: 'me', methods: ['GET'])]
+    public function me(): JsonResponse
+    {
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->json(['error' => 'User not authenticated'], 401);
+        }
+
+        return $this->json([
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'roles' => $user->getRoles(),
+        ]);
+    }
+
+
 }
