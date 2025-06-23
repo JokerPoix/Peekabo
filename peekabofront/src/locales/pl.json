@@ -1,0 +1,13 @@
+{
+    "chatbot": {
+      "name": "Exa'Doc",
+      "welcome": "Cześć! Jak mogę Ci dziś pomóc?",
+      "user_message": "Twoja wiadomość tutaj...",
+      "placeholder": "Wpisz wiadomość...",
+      "send": "Wyślij",
+      "delete_history": "Usuń historię",
+      "options": "Opcje",
+      "language": "Wybierz język"
+    }
+  }
+  

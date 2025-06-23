@@ -13,17 +13,17 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql://postgres:your_password@db:5432/app"
+      DATABASE_URL: "postgresql://postgres:postgres@db:5435/app"
   
   db:
     image: postgres:14
     container_name: peekaboo_postgres
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: your_password
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: app
     ports:
-      - "5432:5432"
+      - "5435:5435"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

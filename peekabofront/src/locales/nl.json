@@ -1,0 +1,13 @@
+{
+    "chatbot": {
+      "name": "Exa'Doc",
+      "welcome": "Hallo! Hoe kan ik je vandaag helpen?",
+      "user_message": "Uw bericht hier...",
+      "placeholder": "Typ een bericht...",
+      "send": "Verzenden",
+      "delete_history": "Geschiedenis verwijderen",
+      "options": "Opties",
+      "language": "Kies taal"
+    }
+  }
+  

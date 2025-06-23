@@ -1,0 +1,102 @@
+/* Root variables for consistency */
+:root {
+  --primary-color: #ffd000;
+  --secondary-color: #f0f8ff;
+  --nav-color: #ffd000;
+  --text-color: white;
+  --background-light: #ffffff;
+  --background-dark: #242424;
+
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Global styles */
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--secondary-color);
+  font-family: var(--font-family);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+main {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.page-container {
+  width: 100%;
+  margin: auto auto;
+  text-align: center;
+}
+
+form {
+  width: 100%;
+  max-width: 500px;
+  background: var(--background-light);
+  border-radius: 10px;
+  background-color:rgba(255, 255, 255, 0.5);
+  padding: 10px 20px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+  align-items: center;
+  margin: 5px 5px;
+}
+
+button {
+  width: 100%;
+  max-width: 300px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 10px 0;
+  align-items: center;
+}
+
+button:hover {
+  background-color: #e0e0e0;
+}
+
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Navigation */
+nav {
+  display: flex;
+  justify-content: center;
+  background: var(--nav-color);
+
+}
+
+nav a {
+  color: var(--text-color);
+  font-weight: bold;
+  margin: 5rem;
+  text-decoration: none;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+footer {
+  background: var(--primary-color);
+  color: var(--text-color);
+  text-align: center;
+  width: 100%;
+}
