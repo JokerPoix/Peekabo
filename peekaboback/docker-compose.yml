@@ -13,7 +13,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: "postgresql://postgres:postgres@db:5435/app"
+      DATABASE_URL: "postgresql://postgres:postgres@db:5432/app"
   
   db:
     image: postgres:14
@@ -26,6 +26,19 @@ services:
       - "5435:5435"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
+  front:
+    build:
+      context: ../peekabofront
+      dockerfile: Dockerfile.front
+    container_name: peekaboo_front
+    ports:
+      - "8010:8010"
+    volumes:
+      - ../peekabofront:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://app:80
+    depends_on:
+      - app
 volumes:
   postgres_data:

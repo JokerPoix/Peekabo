@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "orval --config ./orval.config.ts && vite",
+    "dev": "vite",
     "build": "orval --config ./orval.config.ts && vite build",
     "preview": "vite preview",
     "build-only": "vite build",

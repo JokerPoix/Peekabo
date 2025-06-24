@@ -1,46 +1,70 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import type { Bird } from '@/api/peekaboo_methods.schemas';
+import { getBirds } from '@/api/default';
 
 export default defineComponent({
   name: 'BirdList',
-  setup() {
+  emits: ['bird-selected'], // Define the emit
+  setup(props, { emit }) {
     const birds = ref<(Bird & { image: string })[]>([]);
     const selectedBirdId = ref<number | null>(null);
+    const loading = ref<boolean>(false);
+    const error = ref<string | null>(null);
 
-    onMounted(() => {
-      // Mock bird list with profile images
-      birds.value = [
-        {
-          id: 1,
-          name: 'Eagle',
-          latitude: 48.8566, // Example: Paris
-          longitude: 2.3522,
-          owner: 'John Doe',
-          gps_id: 'GPS123',
-          image: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hausrotschwanz_Brutpflege_2006-05-24_211.jpg?uselang=fr',
-        },
-        {
-          id: 2,
-          name: 'Sparrow',
-          latitude: 51.5074, // Example: London
-          longitude: -0.1278,
-          owner: 'Jane Smith',
-          gps_id: 'GPS456',
-          image: 'https://upload.wikimedia.org/wikipedia/commons/b/bd/PasserDomesticusKopula.jpg?uselang=fr',
-        },
-      ];
-    });
-
-    const toggleSelection = (birdId: number) => {
-      if (selectedBirdId.value === birdId) {
-        selectedBirdId.value = null;
-      } else {
-        selectedBirdId.value = birdId;
+    const fetchBirds = async () => {
+      loading.value = true;
+      error.value = null;
+      try {
+        // Call the API using the generated client
+        const response = await getBirds();
+        
+        // Map the response to include image URLs
+        birds.value = response.data.map(bird => ({
+          ...bird,
+          image: getRandomBirdImage(bird.name || ''),
+        }));
+      } catch (err) {
+        console.error('Error fetching birds:', err);
+        error.value = 'Failed to load birds. Please try again later.';
+      } finally {
+        loading.value = false;
       }
     };
 
-    return { birds, selectedBirdId, toggleSelection };
+    // Helper function to assign random bird images
+    const getRandomBirdImage = (birdName: string) => {
+      const images = [
+        'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hausrotschwanz_Brutpflege_2006-05-24_211.jpg?uselang=fr',
+        'https://upload.wikimedia.org/wikipedia/commons/b/bd/PasserDomesticusKopula.jpg?uselang=fr',
+      ];
+      
+      const index = birdName.charCodeAt(0) % images.length;
+      return images[index];
+    };
+
+    onMounted(() => {
+      fetchBirds();
+    });
+
+    const toggleSelection = (birdId: number) => {
+      // Find the bird object
+      const selectedBird = birds.value.find(b => b.id === birdId);
+      
+      if (selectedBirdId.value === birdId) {
+        // Deselect bird
+        selectedBirdId.value = null;
+        emit('bird-selected', null);
+      } else {
+        // Select bird
+        selectedBirdId.value = birdId;
+        if (selectedBird) {
+          emit('bird-selected', selectedBird);
+        }
+      }
+    };
+
+    return { birds, selectedBirdId, toggleSelection, loading, error };
   },
 });
 </script>
@@ -48,7 +72,24 @@ export default defineComponent({
 <template>
   <div>
     <h1>Bird List</h1>
-    <div class="bird-list-container">
+    
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-state">
+      Loading birds...
+    </div>
+    
+    <!-- Error state -->
+    <div v-else-if="error" class="error-message">
+      {{ error }}
+    </div>
+    
+    <!-- Empty state -->
+    <div v-else-if="birds.length === 0" class="empty-state">
+      No birds found.
+    </div>
+    
+    <!-- Birds list -->
+    <div v-else class="bird-list-container">
       <div 
         v-for="bird in birds" 
         :key="bird.id" 
@@ -135,5 +176,15 @@ export default defineComponent({
 .bird-owner {
   font-style: italic;
   color: #555;
+}
+
+.loading-state, .error-message, .empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
 }
 </style>

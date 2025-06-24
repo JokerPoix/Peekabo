@@ -17,14 +17,33 @@ export default defineConfig({
     },
   },
   server: {
+    port: 8010,  
+    strictPort: true,
+    host: '0.0.0.0',
     proxy: {
-      '/api/chatbot': {
-        target: 'http://localhost:8084', // ✅ Quarkus Backend
+      '/birds': {
+        target: 'http://peekaboo_symfony:80', // Use the container name
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path
+      },
+      '/bird': {
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
-      '/admin/prompts': {
-        target: 'http://localhost:8080', // ✅ Backend for /admin/prompts
+      '/user': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true, 
+        secure: false
+      },
+      '/login': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
+      },
+      '/register': {
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       }

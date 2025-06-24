@@ -5,7 +5,7 @@
  * API for managing birds, their location histories, and user authentication.
  * OpenAPI spec version: 1.0.0
  */
-import * as axios from 'axios';
+import axios from 'axios';
 import type {
   AxiosRequestConfig,
   AxiosResponse
@@ -22,90 +22,87 @@ import type {
   PostRegisterBody
 } from './peekaboo_methods.schemas';
 
-
-
-
-
-  export const getDefault = () => {
 /**
  * Retrieves a list of all birds.
  * @summary Get All Birds
  */
-const getBirds = <TData = AxiosResponse<Bird[]>>(
-     options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/birds`,options
-    );
-  }
+export const getBirds = <TData = AxiosResponse<Bird[]>>(
+  options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(`/birds`, options);
+}
 /**
  * Retrieves all birds owned by a given user.
  * @summary Get Birds for a Specific User
  */
-const getUserUserIdBirds = <TData = AxiosResponse<Bird[]>>(
-    userId: number, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/user/${userId}/birds`,options
-    );
-  }
+export const getUserUserIdBirds = <TData = AxiosResponse<Bird[]>>(
+  userId: number, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(
+    `/user/${userId}/birds`, options
+  );
+}
+
 /**
  * Updates the location of a bird identified by its GPS ID.
  * @summary Update Bird Locations
  */
-const postBirdGpsIdLocations = <TData = AxiosResponse<PostBirdGpsIdLocations200>>(
-    gpsId: string,
-    postBirdGpsIdLocationsBody: PostBirdGpsIdLocationsBody, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/bird/${gpsId}/locations`,
-      postBirdGpsIdLocationsBody,options
-    );
-  }
+export const postBirdGpsIdLocations = <TData = AxiosResponse<PostBirdGpsIdLocations200>>(
+  gpsId: string,
+  postBirdGpsIdLocationsBody: PostBirdGpsIdLocationsBody, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(
+    `/bird/${gpsId}/locations`,
+    postBirdGpsIdLocationsBody, options
+  );
+}
+
 /**
  * Retrieves the most recent location for the specified bird.
  * @summary Get Last Location of a Bird
  */
-const getBirdIdLocation = <TData = AxiosResponse<Location>>(
-    id: number, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/bird/${id}/location`,options
-    );
-  }
+export const getBirdIdLocation = <TData = AxiosResponse<Location>>(
+  id: number, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(
+    `/bird/${id}/location`, options
+  );
+}
+
 /**
  * Retrieves the complete ordered location history for a specified bird.
  * @summary Get Bird's Path (Location History)
  */
-const getBirdIdPath = <TData = AxiosResponse<Location[]>>(
-    id: number, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.get(
-      `/bird/${id}/path`,options
-    );
-  }
+export const getBirdIdPath = <TData = AxiosResponse<Location[]>>(
+  id: number, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.get(
+    `/bird/${id}/path`, options
+  );
+}
+
 /**
  * Authenticates a user and returns a JWT token.
  * @summary User Login
  */
-const postLogin = <TData = AxiosResponse<PostLogin200>>(
-    postLoginBody: PostLoginBody, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/login`,
-      postLoginBody,options
-    );
-  }
+export const postLogin = <TData = AxiosResponse<PostLogin200>>(
+  postLoginBody: PostLoginBody, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(
+    `/login`,
+    postLoginBody, options
+  );
+}
+
 /**
  * Registers a new user.
  * @summary User Registration
  */
-const postRegister = <TData = AxiosResponse<PostRegister201>>(
-    postRegisterBody: PostRegisterBody, options?: AxiosRequestConfig
- ): Promise<TData> => {
-    return axios.default.post(
-      `/register`,
-      postRegisterBody,options
-    );
-  }
-return {}};
+export const postRegister = <TData = AxiosResponse<PostRegister201>>(
+  postRegisterBody: PostRegisterBody, options?: AxiosRequestConfig
+): Promise<TData> => {
+  return axios.post(
+    `/register`,
+    postRegisterBody, options
+  );
+}
