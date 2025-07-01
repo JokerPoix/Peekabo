@@ -28,23 +28,28 @@ class AppFixtures extends Fixture
         $user->setRoles(['ROLE_USER']);
         $manager->persist($user);
 
-        // Base GPS
-        $baseLat = 43.6012;
-        $baseLng = 3.9122;
-        $offsets = [[0.0003, 0.0002], [-0.0004, 0.0001], [0.0002, -0.0003], [-0.0003, -0.0002]];
+        // Base GPS — 349 Rue de la Cavalade
+        $baseLat = 43.624365;
+        $baseLng = 3.923660;
+
+        $offsets = [
+            [0.0003, 0.0002],
+            [-0.0004, 0.0001],
+            [0.0002, -0.0003],
+            [-0.0003, -0.0002]
+        ];
+
 
         for ($i = 0; $i < 4; $i++) {
             $bird = new Bird();
             $bird->setName("Bird #" . ($i + 1));
-            $bird->setGpsId("GPS00$i");
+            $bird->setGpsId("CAVAL0" . ($i + 1));
             $bird->setOwner($user);
             $manager->persist($bird);
 
-            // Position actuelle
             $lat = $baseLat + $offsets[$i][0];
             $lng = $baseLng + $offsets[$i][1];
 
-            // Historique J-1
             $history1 = new LocationHistory();
             $history1->setBird($bird);
             $history1->setLatitude($lat - 0.0001);
@@ -52,7 +57,6 @@ class AppFixtures extends Fixture
             $history1->setTimestamp(new \DateTime('-1 day'));
             $manager->persist($history1);
 
-            // Historique J-0
             $history2 = new LocationHistory();
             $history2->setBird($bird);
             $history2->setLatitude($lat);
@@ -60,6 +64,7 @@ class AppFixtures extends Fixture
             $history2->setTimestamp(new \DateTime());
             $manager->persist($history2);
         }
+
 
         $manager->flush();
     }

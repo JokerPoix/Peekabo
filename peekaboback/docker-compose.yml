@@ -40,5 +40,19 @@ services:
       - VITE_API_URL=http://app:80
     depends_on:
       - app
+
+  mover:
+    build:
+      context: ./mover
+      dockerfile: Dockerfile.mover
+    container_name: peekaboo_mover
+    depends_on:
+      - app
+    environment:
+      API_URL: http://app
+      GPS_ID: "CAVAL01"
+    restart: always
+
 volumes:
   postgres_data:
+
