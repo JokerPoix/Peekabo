@@ -4,6 +4,8 @@ import BirdList from "@/components/BirdList.vue";
 
 <template>
   <body>
+        
+    <h1>Liste des Oiseaux</h1>
     <div class="menu">
       <BirdList class="button" />
     </div>

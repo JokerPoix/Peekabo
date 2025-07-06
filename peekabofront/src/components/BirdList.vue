@@ -1,91 +1,98 @@
-<script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import type { Bird } from '@/api/peekaboo_methods.schemas';
 import { getBirds } from '@/api/default';
 
-export default defineComponent({
-  name: 'BirdList',
-  emits: ['bird-selected'], // Define the emit
-  setup(props, { emit }) {
-    const birds = ref<(Bird & { image: string })[]>([]);
-    const selectedBirdId = ref<number | null>(null);
-    const loading = ref<boolean>(false);
-    const error = ref<string | null>(null);
+const birds = ref<(Bird & { image: string })[]>([]);
+const selectedBirdId = ref<number | null>(null);
+const loading = ref<boolean>(false);
+const error = ref<string | null>(null);
 
-    const fetchBirds = async () => {
-      loading.value = true;
-      error.value = null;
-      try {
-        // Call the API using the generated client
-        const response = await getBirds();
-        
-        // Map the response to include image URLs
-        birds.value = response.data.map(bird => ({
-          ...bird,
-          image: getRandomBirdImage(bird.name || ''),
-        }));
-      } catch (err) {
-        console.error('Error fetching birds:', err);
-        error.value = 'Failed to load birds. Please try again later.';
-      } finally {
-        loading.value = false;
-      }
-    };
+// Define the emit for component usage
+const emit = defineEmits(['bird-selected']);
 
-    // Helper function to assign random bird images
-    const getRandomBirdImage = (birdName: string) => {
-      const images = [
-        'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hausrotschwanz_Brutpflege_2006-05-24_211.jpg?uselang=fr',
-        'https://upload.wikimedia.org/wikipedia/commons/b/bd/PasserDomesticusKopula.jpg?uselang=fr',
-      ];
-      
-      const index = birdName.charCodeAt(0) % images.length;
-      return images[index];
-    };
+const fetchBirds = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    // Call the API using the generated client
+    const response = await getBirds();
+    console.log('API response:', response); // Debug log
+    
+    if (response.data && Array.isArray(response.data)) {
+      // Map the response to include image URLs
+      birds.value = response.data.map(bird => ({
+        ...bird,
+        image: getRandomBirdImage(bird.name || ''),
+      }));
+    } else {
+      console.error('Unexpected API response format:', response);
+      error.value = 'Unexpected response format from API';
+    }
+  } catch (err) {
+    console.error('Error fetching birds:', err);
+    error.value = 'Failed to load birds. Please try again later.';
+  } finally {
+    loading.value = false;
+  }
+};
 
-    onMounted(() => {
-      fetchBirds();
-    });
+// Helper function to assign random bird images
+const getRandomBirdImage = (birdName: string) => {
+  const images = [
+    'https://upload.wikimedia.org/wikipedia/commons/e/e1/Hausrotschwanz_Brutpflege_2006-05-24_211.jpg?uselang=fr',
+    'https://upload.wikimedia.org/wikipedia/commons/b/bd/PasserDomesticusKopula.jpg?uselang=fr',
+  ];
+  
+  const index = birdName.charCodeAt(0) % images.length;
+  return images[index];
+};
 
-    const toggleSelection = (birdId: number) => {
-      // Find the bird object
-      const selectedBird = birds.value.find(b => b.id === birdId);
-      
-      if (selectedBirdId.value === birdId) {
-        // Deselect bird
-        selectedBirdId.value = null;
-        emit('bird-selected', null);
-      } else {
-        // Select bird
-        selectedBirdId.value = birdId;
-        if (selectedBird) {
-          emit('bird-selected', selectedBird);
-        }
-      }
-    };
+const toggleSelection = (birdId: number) => {
+  // Find the bird object
+  const selectedBird = birds.value.find(b => b.id === birdId);
+  
+  if (selectedBirdId.value === birdId) {
+    // Deselect bird
+    selectedBirdId.value = null;
+    emit('bird-selected', null);
+  } else {
+    // Select bird
+    selectedBirdId.value = birdId;
+    if (selectedBird) {
+      emit('bird-selected', selectedBird);
+    }
+  }
+};
 
-    return { birds, selectedBirdId, toggleSelection, loading, error };
-  },
+onMounted(() => {
+  fetchBirds();
 });
 </script>
 
 <template>
   <div>
-    <h1>Bird List</h1>
     
     <!-- Loading state -->
     <div v-if="loading" class="loading-state">
-      Loading birds...
+      <div class="spinner"></div>
+      <div>Loading birds...</div>
     </div>
     
     <!-- Error state -->
     <div v-else-if="error" class="error-message">
       {{ error }}
+      <div>
+        <button @click="fetchBirds" class="retry-button">Retry</button>
+      </div>
     </div>
     
     <!-- Empty state -->
     <div v-else-if="birds.length === 0" class="empty-state">
-      No birds found.
+      No birds found. The API might be returning an empty array.
+      <div>
+        <button @click="fetchBirds" class="retry-button">Retry</button>
+      </div>
     </div>
     
     <!-- Birds list -->
@@ -103,10 +110,10 @@ export default defineComponent({
           </div>
           <div class="bird-details">
             <div class="bird-name">{{ bird.name }}</div>
-            <div class="bird-location">
-              <span>{{ bird.latitude }}, {{ bird.longitude }}</span>
+            <div class="bird-location" v-if="bird.latitude && bird.longitude">
+              <span>{{ bird.latitude.toFixed(6) }}, {{ bird.longitude.toFixed(6) }}</span>
             </div>
-            <div class="bird-owner">Owner: {{ bird.owner }}</div>
+            <div class="bird-owner" v-if="bird.owner">Owner: {{ bird.owner }}</div>
           </div>
         </div>
       </div>
@@ -186,5 +193,34 @@ export default defineComponent({
 
 .error-message {
   color: #d32f2f;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin: 10px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
 }
 </style>

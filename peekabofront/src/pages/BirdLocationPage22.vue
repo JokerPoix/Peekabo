@@ -66,10 +66,11 @@ const handleBirdSelected = (bird: Bird | null) => {
       birdLocation.value.latitude = bird.latitude;
       birdLocation.value.longitude = bird.longitude;
       
+      // Update marker and center map if they exist
       if (map.value && marker.value) {
         const newLatLng = L.latLng(bird.latitude, bird.longitude);
         marker.value.setLatLng(newLatLng);
-        map.value.setView(newLatLng, map.value.getZoom());
+        map.value.setView(newLatLng, 13);
       }
     }
     
@@ -187,9 +188,7 @@ watch(
       marker.value.setLatLng([newLocation.latitude, newLocation.longitude]);
 
       // Center the map on the new location
-    map.value.setView([newLocation.latitude, newLocation.longitude], map.value.getZoom());
-
-
+      map.value.setView([newLocation.latitude, newLocation.longitude], 13);
       
       // Add this point to the path if it's not empty
       if (birdPath.value.length > 0) {
@@ -262,6 +261,8 @@ onUnmounted(() => {
       <BirdList @bird-selected="handleBirdSelected" />
     </div>
     
+    <h1>{{ birdTitle }}</h1>
+    
     <!-- Add a small indicator showing real-time updates -->
     <div v-if="selectedBird && locationUpdateInterval" class="update-indicator">
       <span class="update-dot"></span> Updating location every 10 seconds
@@ -271,10 +272,6 @@ onUnmounted(() => {
     <div v-else-if="error" class="error-message">
       {{ error }}
     </div>
-
-
-    <!-- Map container -->
-    <div id="map" style="height: 400px; width: 100%; margin-top: 20px;"></div>
     
     <!-- Bird info display -->
     <div v-if="selectedBird" class="bird-details">
@@ -285,11 +282,34 @@ onUnmounted(() => {
       <p><strong>Current Location:</strong> {{ birdLocation.latitude.toFixed(6) }}, {{ birdLocation.longitude.toFixed(6) }}</p>
       <p v-if="hasPath"><strong>Path points:</strong> {{ birdPath.length }}</p>
     </div>
+
+    <!-- Map container -->
+    <div id="map" style="height: 400px; width: 100%; margin-top: 20px;"></div>
     
     <!-- Manual controls (useful for testing) -->
-    <div class="manual-controls">      
+    <div class="manual-controls">
+      <h3>Manual Location Control</h3>
+      <label>
+        Latitude:
+        <input
+          type="number"
+          step="0.0001"
+          :value="birdLocation.latitude"
+          @input="updateLocation('latitude', $event.target.value)"
+        />
+      </label>
+      <label>
+        Longitude:
+        <input
+          type="number"
+          step="0.0001"
+          :value="birdLocation.longitude"
+          @input="updateLocation('longitude', $event.target.value)"
+        />
+      </label>
+      
       <!-- Button to get user's current location -->
-      <button @click="getUserLocation"> Ma Position</button>
+      <button @click="getUserLocation">📍 Use My Current Location</button>
     </div>
   </div>
   
