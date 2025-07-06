@@ -71,31 +71,35 @@ class BirdController extends AbstractController
 
 
     #[Route('/bird/{gpsId}/locations', name: 'update_locations', methods: ['POST'])]
-    public function updateLocations(string $gpsId, Request $request): JsonResponse
+    public function updateLocations(string $gpsId, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['locations']) || !is_array($data['locations'])) {
-            return $this->json(['error' => 'Invalid payload'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => 'Invalid payload'], Response::HTTP_BAD_REQUEST);
         }
 
-        $bird = $this->entityManager->getRepository(Bird::class)->findOneBy(['gpsId' => $gpsId]);
+        $bird = $entityManager->getRepository(Bird::class)->findOneBy(['gpsId' => $gpsId]);
 
         if (!$bird) {
-            return $this->json(['error' => 'Bird not found'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['error' => 'Bird not found'], Response::HTTP_NOT_FOUND);
         }
 
-        foreach ($data['locations'] as $location) {
-            if (isset($location['latitude'], $location['longitude'])) {
-                $bird->setLatitude((float) $location['latitude']);
-                $bird->setLongitude((float) $location['longitude']);
+        foreach ($data['locations'] as $locationData) {
+            if (isset($locationData['latitude'], $locationData['longitude'])) {
+                $location = new LocationHistory();
+                $location->setLatitude((float) $locationData['latitude']);
+                $location->setLongitude((float) $locationData['longitude']);
+                $location->setTimestamp(new \DateTime());
+                $location->setBird($bird);
+
+                $entityManager->persist($location);
             }
         }
 
-        $this->entityManager->persist($bird);
-        $this->entityManager->flush();
+        $entityManager->flush();
 
-        return $this->json(['message' => 'Locations updated successfully']);
+        return new JsonResponse(['message' => 'Locations saved successfully']);
     }
 
     #[Route('/bird/{id}/location', name: 'get_last_location', methods: ['GET'])]
