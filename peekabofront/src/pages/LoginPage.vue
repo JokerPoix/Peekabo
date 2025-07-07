@@ -1,6 +1,7 @@
 <template>
   <body>
     <div class="page-container">
+      <div class="form-container">
         <form @submit.prevent="handleLogin">
           <div class="input-group">
             <label for="username">Identifiant</label>
@@ -15,6 +16,7 @@
             <button type="submit" class="signup-button">Connexion</button>
           </div>
         </form>
+      </div>
     </div>
   </body>
 </template>
@@ -45,7 +47,33 @@ export default {
   min-height: 100vh;
   color: white;
   text-shadow: 0 0 5px #000; /* for better readability */
-  align-items: center;
   display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+}
+
+form {
+  width: 100%;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.login-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-link {
+  margin-bottom: 1rem;
 }
 </style>

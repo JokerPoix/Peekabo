@@ -1,23 +1,25 @@
 <template>
   <div class="page-container">
-    <form class="menu" @submit.prevent="handleSignup">
-      <div class="input-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" v-model="username" required />
-      </div>
-      <div class="input-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
-      </div>
-      <div class="input-group">
-        <label for="confirmPassword">Confirm Password</label>
-        <input type="password" id="confirmPassword" v-model="confirmPassword" required />
-      </div>
-      <button type="submit" class="signup-button">Sign Up</button>
-      <p class="login-link">
-        Already have an account? <router-link to="/login">Log in</router-link>
-      </p>
-    </form>
+    <div class="form-container">
+      <form class="menu" @submit.prevent="handleSignup">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" v-model="username" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" v-model="password" required />
+        </div>
+        <div class="input-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" v-model="confirmPassword" required />
+        </div>
+        <button type="submit" class="signup-button">Sign Up</button>
+        <p class="login-link">
+          Already have an account? <router-link to="/login">Log in</router-link>
+        </p>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -53,7 +55,28 @@ export default {
   min-height: 100vh;
   color: white;
   text-shadow: 0 0 5px #000; /* for better readability */
-  align-items: center;
   display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  justify-content: center;
+}
+
+form {
+  width: 100%;
+}
+
+.input-group {
+  margin-bottom: 1rem;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1rem;
 }
 </style>

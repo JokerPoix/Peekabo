@@ -261,6 +261,7 @@ onUnmounted(() => {
     <div class="menu">
       <BirdList @bird-selected="handleBirdSelected" />
     </div>
+
     
     <!-- Add a small indicator showing real-time updates -->
     <div v-if="selectedBird && locationUpdateInterval" class="update-indicator">
