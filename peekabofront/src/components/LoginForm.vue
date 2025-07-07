@@ -15,10 +15,10 @@
         </div>
       </div>
       <button type="submit" class="modern-button">
-        <span class="btn-text">Login</span>
+        <span class="btn-text">Connexion</span>
       </button>
       <p class="signup-link">
-        Don't have an account? <router-link to="/signup" class="modern-link">Sign Up</router-link>
+        Vous n'avez pas de compte ? <router-link to="/signup" class="modern-link">S'inscrire</router-link>
       </p>
     </form>
   </div>

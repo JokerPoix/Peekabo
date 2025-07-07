@@ -1,24 +1,24 @@
 <template>
   <div>
-    <h1>Add Bird</h1>
+    <h1>Ajouter un oiseau</h1>
     <form @submit.prevent="addBird">
       <label>
-        Name:
+        Nom :
         <input v-model="bird.name" type="text" required />
       </label>
       <label>
-        Latitude:
+        Latitude :
         <input v-model="bird.latitude" type="number" required />
       </label>
       <label>
-        Longitude:
+        Longitude :
         <input v-model="bird.longitude" type="number" required />
       </label>
       <label>
-        Owner:
+        Propriétaire :
         <input v-model="bird.owner" type="text" required />
       </label>
-      <button type="submit">Add Bird</button>
+      <button type="submit">Ajouter l'oiseau</button>
     </form>
   </div>
 </template>

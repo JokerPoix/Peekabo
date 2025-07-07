@@ -3,20 +3,20 @@
     <div class="form-container">
       <form class="menu" @submit.prevent="handleSignup">
         <div class="input-group">
-          <label for="username">Username</label>
+          <label for="username">Nom d'utilisateur</label>
           <input type="text" id="username" v-model="username" required />
         </div>
         <div class="input-group">
-          <label for="password">Password</label>
+          <label for="password">Mot de passe</label>
           <input type="password" id="password" v-model="password" required />
         </div>
         <div class="input-group">
-          <label for="confirmPassword">Confirm Password</label>
+          <label for="confirmPassword">Confirmez le mot de passe</label>
           <input type="password" id="confirmPassword" v-model="confirmPassword" required />
         </div>
-        <button type="submit" class="signup-button">Sign Up</button>
+        <button type="submit" class="signup-button">S'inscrire</button>
         <p class="login-link">
-          Already have an account? <router-link to="/login">Log in</router-link>
+          Vous avez déjà un compte ? <router-link to="/login">Se connecter</router-link>
         </p>
       </form>
     </div>

@@ -1,17 +1,17 @@
 <template>
   <div v-if="user" class="user-details-card">
-    <h1>User Details</h1>
+    <h1>Détails de l'utilisateur</h1>
     <div class="details-container">
       <div class="detail-item">
-        <div class="detail-label">Email:</div>
+        <div class="detail-label">Email&nbsp;:</div>
         <div class="detail-value">{{ user.email }}</div>
       </div>
-      <!-- Add more user details here as needed -->
+      <!-- Ajoutez d'autres détails utilisateur ici si nécessaire -->
     </div>
   </div>
   <div v-else class="user-details-card loading">
     <div class="loading-indicator">
-      <span>Loading user details...</span>
+      <span>Chargement des détails de l'utilisateur...</span>
     </div>
   </div>
 </template>

@@ -25,13 +25,13 @@ export default defineComponent({
 
 
 <template>
-    <div v-if="bird">
-      <h1>Bird Details</h1>
-      <p><strong>Name:</strong> {{ bird.name }}</p>
-      <p><strong>Latitude:</strong> {{ bird.latitude }}</p>
-      <p><strong>Longitude:</strong> {{ bird.longitude }}</p>
-      <p><strong>Owner:</strong> {{ bird.owner }}</p>
-      <p><strong>GPS ID:</strong> {{ bird.gps_id }}</p>
-    </div>
-  </template>
+  <div v-if="bird">
+    <h1>Détails de l'oiseau</h1>
+    <p><strong>Nom :</strong> {{ bird.name }}</p>
+    <p><strong>Latitude :</strong> {{ bird.latitude }}</p>
+    <p><strong>Longitude :</strong> {{ bird.longitude }}</p>
+    <p><strong>Propriétaire :</strong> {{ bird.owner }}</p>
+    <p><strong>ID GPS :</strong> {{ bird.gps_id }}</p>
+  </div>
+</template>
   

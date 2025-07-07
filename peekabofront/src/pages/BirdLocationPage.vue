@@ -279,12 +279,12 @@ onUnmounted(() => {
     
     <!-- Bird info display -->
     <div v-if="selectedBird" class="bird-details">
-      <p><strong>Bird ID:</strong> {{ selectedBird.id }}</p>
-      <p><strong>Name:</strong> {{ selectedBird.name }}</p>
-      <p><strong>GPS ID:</strong> {{ selectedBird.gps_id }}</p>
-      <p><strong>Owner:</strong> {{ selectedBird.owner }}</p>
-      <p><strong>Current Location:</strong> {{ birdLocation.latitude.toFixed(6) }}, {{ birdLocation.longitude.toFixed(6) }}</p>
-      <p v-if="hasPath"><strong>Path points:</strong> {{ birdPath.length }}</p>
+      <p><strong>ID de l'oiseau :</strong> {{ selectedBird.id }}</p>
+      <p><strong>Nom :</strong> {{ selectedBird.name }}</p>
+      <p><strong>ID GPS :</strong> {{ selectedBird.gps_id }}</p>
+      <p><strong>Propriétaire :</strong> {{ selectedBird.owner }}</p>
+      <p><strong>Position actuelle :</strong> {{ birdLocation.latitude.toFixed(6) }}, {{ birdLocation.longitude.toFixed(6) }}</p>
+      <p v-if="hasPath"><strong>Nombre de points du trajet :</strong> {{ birdPath.length }}</p>
     </div>
     
     <!-- Manual controls (useful for testing) -->

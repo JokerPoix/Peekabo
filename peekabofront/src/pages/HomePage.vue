@@ -1,7 +1,6 @@
 <template>
   <div class="page-container">
     <img src="../assets/img/image_peekaboo.png" alt="Peekaboo Icon" class="chatbot-icon" style="max-width: 25vh; height: auto; padding: 20px; border-radius: 150px;" />
-    <p>Navigate through the menu to explore the features.</p>
   </div>
 </template>
 

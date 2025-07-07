@@ -76,22 +76,22 @@ onMounted(() => {
     <!-- Loading state -->
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
-      <div>Loading birds...</div>
+      <div>Chargement des oiseaux...</div>
     </div>
     
     <!-- Error state -->
     <div v-else-if="error" class="error-message">
       {{ error }}
       <div>
-        <button @click="fetchBirds" class="retry-button">Retry</button>
+        <button @click="fetchBirds" class="retry-button">Réessayer</button>
       </div>
     </div>
     
     <!-- Empty state -->
     <div v-else-if="birds.length === 0" class="empty-state">
-      No birds found. The API might be returning an empty array.
+      Aucun oiseau trouvé. L'API retourne peut-être un tableau vide.
       <div>
-        <button @click="fetchBirds" class="retry-button">Retry</button>
+        <button @click="fetchBirds" class="retry-button">Réessayer</button>
       </div>
     </div>
     
@@ -106,14 +106,14 @@ onMounted(() => {
       >
         <div class="bird-info">
           <div class="bird-image">
-            <img :src="bird.image" alt="Bird Profile" />
+            <img :src="bird.image" alt="Photo de l'oiseau" />
           </div>
           <div class="bird-details">
             <div class="bird-name">{{ bird.name }}</div>
             <div class="bird-location" v-if="bird.latitude && bird.longitude">
               <span>{{ bird.latitude.toFixed(6) }}, {{ bird.longitude.toFixed(6) }}</span>
             </div>
-            <div class="bird-owner" v-if="bird.owner">Owner: {{ bird.owner }}</div>
+            <div class="bird-owner" v-if="bird.owner">Propriétaire : {{ bird.owner }}</div>
           </div>
         </div>
       </div>

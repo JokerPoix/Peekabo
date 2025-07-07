@@ -40,7 +40,7 @@ const accessHomePage = () => {
         <div class="nav-buttons">
           <button type="button" class="modern-btn" @click="accessHomePage">
             <span class="btn-icon">🏠</span>
-            <span class="btn-text">Home</span>
+            <span class="btn-text">Acceuil</span>
           </button>
           <button type="button" class="modern-btn" @click="accessBirdListPage">
             <span class="btn-icon">🦜</span>
