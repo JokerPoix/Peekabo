@@ -26,6 +26,13 @@ services:
       - "5435:5435"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+
+  model-service:
+    container_name: model-service
+    environment:
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_PORT}
   front:
     build:
       context: ../peekabofront
