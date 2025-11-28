@@ -22,7 +22,7 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/predict': {
-        target: 'http://localhost:5000',
+        target: 'http://peekaboo_class_model_service:8060',
         changeOrigin: true,
         secure: false
       },

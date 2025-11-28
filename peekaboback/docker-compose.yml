@@ -28,11 +28,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
 
-  model-service:
-    container_name: model-service
-    environment:
-      APP_HOST: ${APP_HOST}
-      APP_PORT: ${APP_PORT}
+  peekaboo_class_model_service:
+    container_name: peekaboo_class_model_service
+    build:
+      context: ../peekaboo_class_model_service
+      dockerfile: Dockerfile
+    ports:
+      - "8060:8060"
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    restart: unless-stopped
+    
   front:
     build:
       context: ../peekabofront

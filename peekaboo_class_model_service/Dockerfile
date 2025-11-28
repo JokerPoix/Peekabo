@@ -1,7 +1,4 @@
 
-ARG APP_HOST={APP_HOST} 
-ARG APP_PORT={APP_PORT}
-
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -23,6 +20,6 @@ RUN pip install --no-cache-dir torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.
 RUN pip install --no-cache-dir -r app/requirements.txt
 
 
-EXPOSE 5000
+EXPOSE 8060
 
 CMD ["python", "app/ModelRessource.py"]
