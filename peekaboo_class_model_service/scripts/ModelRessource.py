@@ -53,17 +53,18 @@ def health_check():
     }), 200
 
 
+
 @app.route('/predict', methods=['POST'])
-def predict_bird_species():
+def predict_bird_species_french():
     """
-    Predict bird species from uploaded image.
+    Predict bird species from uploaded image (French labels).
     
     Expected request:
         - Multipart form data with 'image' file
         - Optional: 'top_k' parameter (default: 3)
     
     Returns:
-        JSON response with predictions and confidence scores
+        JSON response with predictions and confidence scores (French species names)
     """
     try:
         # Check if image is in request
@@ -97,20 +98,20 @@ def predict_bird_species():
         # Load image
         image = Image.open(BytesIO(file.read()))
         
-        # Get model service and make prediction
+        # Get model service and make prediction (French)
         service = get_model_service()
-        result = service.get_prediction_result(image, top_k=top_k)
+        service.load_label_translations()  # Ensure translations are loaded
+        result = service.get_prediction_result_french(image, top_k=top_k)
         
-        logger.info(f"Prediction successful: {result['top_prediction']['species']}")
+        logger.info(f"Prediction successful (FR): {result['top_prediction']['species']}")
         return jsonify(result), 200
         
     except Exception as e:
-        logger.error(f"Error during prediction: {e}")
+        logger.error(f"Error during prediction (FR): {e}")
         return jsonify({
             "success": False,
             "error": str(e)
         }), 500
-
 
 @app.route('/predict/url', methods=['POST'])
 def predict_from_url():
