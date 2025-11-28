@@ -21,6 +21,11 @@ export default defineConfig({
     strictPort: true,
     host: '0.0.0.0',
     proxy: {
+      '/predict': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false
+      },
       '/birds': {
         target: 'http://peekaboo_symfony:80', // Use the container name
         changeOrigin: true,

@@ -5,6 +5,7 @@ import BirdLocationPage from "@/pages/BirdLocationPage.vue";
 import LoginPage from "@/pages/LoginPage.vue";
 import SignupPage from "@/pages/SignupPage.vue";
 import GenLogin from "@/pages/LoginPage.vue";
+import CameraClassificationPage from "@/pages/CameraClassificationPage.vue";
 import { isAuthenticated } from "../auth/ authState"; // Import shared state
 
 const routes = [
@@ -12,7 +13,8 @@ const routes = [
   { path: "/birdlist", name: "BirdList", component: BirdListPage },
   { path: "/birdlocation", name: "BirdLocation", component: BirdLocationPage },
   { path: "/sign_up", name: "GenLoginPage", component: SignupPage },
-  { path: "/gen_login", name: "GenLogin", component: GenLogin }
+  { path: "/gen_login", name: "GenLogin", component: GenLogin },
+  { path: "/camera_class", name: "CameraClassificationPage", component: CameraClassificationPage }
 ];
 
 const router = createRouter({

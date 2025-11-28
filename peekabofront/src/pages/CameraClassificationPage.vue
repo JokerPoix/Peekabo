@@ -4,7 +4,11 @@
     <input type="number" v-model.number="topK" min="1" max="10" placeholder="Top K (default 3)" />
     <button @click="sendToApi" :disabled="!imageBase64 || loading">Envoyer</button>
     <div v-if="loading">Analyse en cours...</div>
-    <pre v-if="result">{{ result }}</pre>
+    <div v-if="topPrediction" class="prediction-result">
+      <h3>Espèce prédite :</h3>
+      <p class="species-name">{{ topPrediction.species }}</p>
+      <p class="confidence">Confiance : {{ (topPrediction.confidence * 100).toFixed(2) }}%</p>
+    </div>
     <div v-if="error" style="color: red">{{ error }}</div>
   </div>
 </template>
@@ -18,6 +22,7 @@ export default {
       loading: false,
       result: null,
       error: null,
+      topPrediction: null,
     };
   },
   methods: {
@@ -35,6 +40,7 @@ export default {
       this.loading = true;
       this.result = null;
       this.error = null;
+      this.topPrediction = null;
       try {
         // Convert base64 to Blob
         const base64 = this.imageBase64.split(',')[1];
@@ -56,7 +62,8 @@ export default {
         if (!response.ok) {
           throw new Error(data.error || 'Unknown error');
         }
-        this.result = JSON.stringify(data, null, 2);
+        this.result = data;
+        this.topPrediction = data.top_prediction || null;
       } catch (err) {
         this.error = err.message;
       } finally {
@@ -68,11 +75,22 @@ export default {
 </script>
 
 <style scoped>
-button {
-  margin-top: 12px;
+.prediction-result {
+  margin-top: 24px;
+  padding: 16px;
+  background: #f6f8fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  text-align: center;
 }
-input[type="number"] {
-  margin-left: 8px;
-  width: 80px;
+.species-name {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1976d2;
+  margin: 8px 0;
+}
+.confidence {
+  font-size: 1.1rem;
+  color: #555;
 }
 </style>

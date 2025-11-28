@@ -26,6 +26,9 @@ const accessGenLogin = () => {
   router.push("/gen_login");
 };
 
+const accessCameraClassificationPage = () => {
+  router.push("/camera_class");
+};
 
 const accessHomePage = () => {
   router.push("/");
@@ -57,6 +60,10 @@ const accessHomePage = () => {
           <button type="button" class="modern-btn" @click="accessGenLoginPage">
             <span class="btn-icon">📝</span>
             <span class="btn-text">Gen Login Page</span>
+          </button>
+          <button type="button" class="modern-btn" @click="accessCameraClassificationPage">
+            <span class="btn-icon">📷</span>
+            <span class="btn-text">Détection d' Oiseaux</span>
           </button>
         </div>
       </div>
