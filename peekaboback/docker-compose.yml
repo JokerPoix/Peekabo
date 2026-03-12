@@ -55,6 +55,18 @@ services:
     depends_on:
       - app
 
+  # Ollama Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+      - ./ollama/init-model.sh:/init-model.sh
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "/init-model.sh"]
+
   mover:
     build:
       context: ./mover
