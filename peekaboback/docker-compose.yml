@@ -62,8 +62,8 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ollama-data:/root/.ollama
-      - ./ollama/init-model.sh:/init-model.sh
+      - ../ollama-data:/root/.ollama
+      - ../ollama/init-model.sh:/init-model.sh
     restart: unless-stopped
     entrypoint: ["/bin/bash", "/init-model.sh"]
 

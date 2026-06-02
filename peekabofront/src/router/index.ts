@@ -6,6 +6,7 @@ import LoginPage from "@/pages/LoginPage.vue";
 import SignupPage from "@/pages/SignupPage.vue";
 import GenLogin from "@/pages/LoginPage.vue";
 import CameraClassificationPage from "@/pages/CameraClassificationPage.vue";
+import ChatPage from "@/pages/ChatPage.vue";
 import { isAuthenticated } from "../auth/ authState"; // Import shared state
 
 const routes = [
@@ -14,7 +15,8 @@ const routes = [
   { path: "/birdlocation", name: "BirdLocation", component: BirdLocationPage },
   { path: "/sign_up", name: "GenLoginPage", component: SignupPage },
   { path: "/gen_login", name: "GenLogin", component: GenLogin },
-  { path: "/camera_class", name: "CameraClassificationPage", component: CameraClassificationPage }
+  { path: "/camera_class", name: "CameraClassificationPage", component: CameraClassificationPage },
+  { path: "/chat", name: "Chat", component: ChatPage }
 ];
 
 const router = createRouter({

@@ -8,6 +8,13 @@
       <h3>Espèce prédite :</h3>
       <p class="species-name">{{ topPrediction.species }}</p>
       <p class="confidence">Confiance : {{ (topPrediction.confidence * 100).toFixed(2) }}%</p>
+      <div v-if="loadingDescription" class="description-loading">
+        Chargement de la description...
+      </div>
+      <div v-if="description" class="description">
+        <h4>Description :</h4>
+        <p>{{ description }}</p>
+      </div>
     </div>
     <div v-if="error" style="color: red">{{ error }}</div>
   </div>
@@ -23,6 +30,8 @@ export default {
       result: null,
       error: null,
       topPrediction: null,
+      description: null,
+      loadingDescription: false,
     };
   },
   methods: {
@@ -64,10 +73,51 @@ export default {
         }
         this.result = data;
         this.topPrediction = data.top_prediction || null;
+        
+        // Fetch bird description from LLM
+        if (this.topPrediction) {
+          this.fetchBirdDescription(this.topPrediction.species);
+        }
       } catch (err) {
         this.error = err.message;
       } finally {
         this.loading = false;
+      }
+    },
+    async fetchBirdDescription(speciesName) {
+      this.description = null;
+      this.loadingDescription = true;
+      try {
+        const response = await fetch('/llm/get-chat-birds/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: `Give me a short description (2-3 sentences) about the ${speciesName} bird species, including habitat and key characteristics.`,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // Stream the response text
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullText += decoder.decode(value, { stream: true });
+        }
+
+        this.description = fullText;
+      } catch (err) {
+        this.description = `Unable to load description: ${err.message}`;
+      } finally {
+        this.loadingDescription = false;
       }
     },
   },
@@ -92,5 +142,25 @@ export default {
 .confidence {
   font-size: 1.1rem;
   color: #555;
+}
+.description-loading {
+  margin-top: 16px;
+  font-style: italic;
+  color: #999;
+}
+.description {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  text-align: left;
+}
+.description h4 {
+  margin: 0 0 8px 0;
+  color: #1976d2;
+}
+.description p {
+  margin: 8px 0;
+  line-height: 1.6;
+  color: #333;
 }
 </style>

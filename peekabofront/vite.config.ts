@@ -26,6 +26,16 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      '/llm/get-chat-birds': {
+        target: 'http://peekaboo_class_model_service:8060',
+        changeOrigin: true,
+        secure: false
+      },
+      '/llm/chat': {
+        target: 'http://peekaboo_class_model_service:8060',
+        changeOrigin: true,
+        secure: false
+      },
       '/birds': {
         target: 'http://peekaboo_symfony:80', // Use the container name
         changeOrigin: true,
