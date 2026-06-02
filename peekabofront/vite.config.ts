@@ -22,17 +22,17 @@ export default defineConfig({
     host: '0.0.0.0',
     proxy: {
       '/predict': {
-        target: 'http://peekaboo_class_model_service:8060',
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
       '/llm/get-chat-birds': {
-        target: 'http://peekaboo_class_model_service:8060',
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
       '/llm/chat': {
-        target: 'http://peekaboo_class_model_service:8060',
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
