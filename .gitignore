@@ -1,4 +1,4 @@
 __pycache__/
-ollama_data/
+ollama-data/
 *.pyc
 *.pyo   
