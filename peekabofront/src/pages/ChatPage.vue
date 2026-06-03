@@ -81,10 +81,11 @@ export default {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Stream the response text
+        // Stream the response text via SSE
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let assistantContent = '';
+        let buffer = '';
 
         // Add empty assistant message to update in real-time
         this.messages.push({
@@ -95,10 +96,24 @@ export default {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          
-          const chunk = decoder.decode(value, { stream: true });
-          assistantContent += chunk;
-          
+
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n');
+          // Keep the last incomplete part in the buffer
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            if (part.startsWith('data: ')) {
+              const data = part.slice(6);
+              if (data === '[DONE]') break;
+              if (data.startsWith('[ERROR]')) {
+                assistantContent += data;
+              } else {
+                assistantContent += data;
+              }
+            }
+          }
+
           // Update the last message in real-time
           if (this.messages.length > 0) {
             this.messages[this.messages.length - 1].content = assistantContent;

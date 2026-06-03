@@ -102,15 +102,32 @@ export default {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Stream the response text
+        // Stream the response text via SSE
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
+        let buffer = '';
 
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          fullText += decoder.decode(value, { stream: true });
+
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n');
+          // Keep the last incomplete part in the buffer
+          buffer = parts.pop() || '';
+
+          for (const part of parts) {
+            if (part.startsWith('data: ')) {
+              const data = part.slice(6);
+              if (data === '[DONE]') break;
+              if (data.startsWith('[ERROR]')) {
+                fullText += data;
+              } else {
+                fullText += data;
+              }
+            }
+          }
         }
 
         this.description = fullText;

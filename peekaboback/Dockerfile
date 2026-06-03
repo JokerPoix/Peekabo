@@ -7,12 +7,13 @@ FROM php:8.1-apache
 # Installer les extensions PHP et outils nécessaires
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    libcurl4-openssl-dev \
     unzip \
     git \
     zip \
     postgresql-client \
     netcat-openbsd \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-install pdo pdo_pgsql curl
 
 # Active le module Apache rewrite
 RUN a2enmod rewrite
