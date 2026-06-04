@@ -88,16 +88,19 @@ export default {
         let buffer = '';
 
         // Add empty assistant message to update in real-time
+        const msgIndex = this.messages.length;
         this.messages.push({
           role: 'assistant',
           content: '',
         });
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        let frameCount = 0;
+        let done = false;
+        while (!done) {
+          const result = await reader.read();
+          if (result.done) break;
 
-          buffer += decoder.decode(value, { stream: true });
+          buffer += decoder.decode(result.value, { stream: true });
           const parts = buffer.split('\n');
           // Keep the last incomplete part in the buffer
           buffer = parts.pop() || '';
@@ -105,19 +108,25 @@ export default {
           for (const part of parts) {
             if (part.startsWith('data: ')) {
               const data = part.slice(6);
-              if (data === '[DONE]') break;
-              if (data.startsWith('[ERROR]')) {
-                assistantContent += data;
-              } else {
-                assistantContent += data;
+              if (data === '[DONE]') {
+                done = true;
+                break;
               }
+              assistantContent += data;
             }
           }
 
-          // Update the last message in real-time
-          if (this.messages.length > 0) {
-            this.messages[this.messages.length - 1].content = assistantContent;
-            this.scrollToBottom();
+          // Replace the message object entirely to force Vue reactivity
+          this.messages.splice(msgIndex, 1, {
+            role: 'assistant',
+            content: assistantContent,
+          });
+          this.scrollToBottom();
+
+          // Periodically yield to the browser's rendering pipeline
+          frameCount++;
+          if (frameCount % 8 === 0) {
+            await new Promise(resolve => setTimeout(resolve, 0));
           }
         }
       } catch (err) {
