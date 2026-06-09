@@ -31,6 +31,9 @@ if [ ! -f .env.local ]; then
   echo "JWT_PASSPHRASE=peekaboo" > .env.local
 fi
 
+# Nettoyer les enregistrements de migration orphelins (en BDD mais sans fichier)
+php bin/console dbal:run-sql "DELETE FROM doctrine_migration_versions WHERE version NOT IN ('DoctrineMigrations\\\\Version20250114112406')" --no-interaction 2>/dev/null || true
+
 # Migration de la base
 echo "📦 Migration de la base de données..."
 php bin/console doctrine:migrations:migrate --no-interaction || true

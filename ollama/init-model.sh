@@ -5,12 +5,12 @@
 
 # Wait for Ollama to be ready
 echo "Waiting for Ollama service to be ready..."
-for i in {1..30}; do
+for i in {1..10}; do
     if curl -s http://localhost:11434/ > /dev/null 2>&1; then
         echo "✅ Ollama service is ready!"
         break
     fi
-    echo "Waiting... ($i/30)"
+    echo "Waiting... ($i/10)"
     sleep 2
 done
 

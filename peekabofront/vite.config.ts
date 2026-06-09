@@ -1,15 +1,11 @@
 import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import vueJsx from '@vitejs/plugin-vue-jsx'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
-    vueJsx(),
-    vueDevTools(),
+    react(),
   ],
   resolve: {
     alias: {
@@ -17,29 +13,38 @@ export default defineConfig({
     },
   },
   server: {
-    port: 8010,  
+    port: 8010,
     strictPort: true,
     host: '0.0.0.0',
     proxy: {
       '/predict': {
-        target: 'http://peekaboo_class_model_service:8060',
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
+      },
+      '/bird_reports': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
+      },
+      '/llm': {
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
       '/birds': {
-        target: 'http://peekaboo_symfony:80', // Use the container name
+        target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path
       },
-      '/bird': {
+      '/bird/': {
         target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
       },
       '/user': {
         target: 'http://peekaboo_symfony:80',
-        changeOrigin: true, 
+        changeOrigin: true,
         secure: false
       },
       '/login': {
@@ -48,6 +53,11 @@ export default defineConfig({
         secure: false
       },
       '/register': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
+      },
+      '/bird_report/': {
         target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false

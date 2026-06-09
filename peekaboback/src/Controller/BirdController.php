@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Bird;
+use App\Entity\BirdReport;
 use App\Entity\LocationHistory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -150,5 +151,49 @@ class BirdController extends AbstractController
         }, $locations);
 
         return $this->json($response);
+    }
+
+    #[Route('/bird_reports', name: 'get_bird_reports', methods: ['GET'])]
+    public function getBirdReports(): JsonResponse
+    {
+        $reports = $this->entityManager->getRepository(BirdReport::class)->findBy(
+            [],
+            ['timestamp' => 'DESC']
+        );
+        error_log("[Peekaboo] getBirdReports: count=" . count($reports));
+
+        $response = array_map(function (BirdReport $report) {
+            return [
+                'id' => $report->getId(),
+                'species' => $report->getSpecies(),
+                'latitude' => $report->getLatitude(),
+                'longitude' => $report->getLongitude(),
+                'timestamp' => $report->getTimestamp()->format('Y-m-d H:i:s'),
+                'user_email' => $report->getUser()?->getEmail(),
+                'photo_url' => $report->getPhotoPath() ? '/bird_report/' . $report->getId() . '/photo' : null,
+            ];
+        }, $reports);
+
+        return $this->json($response);
+    }
+
+    #[Route('/bird_report/{id}/photo', name: 'get_bird_report_photo', methods: ['GET'])]
+    public function getBirdReportPhoto(string $id): Response
+    {
+        $report = $this->entityManager->getRepository(BirdReport::class)->find($id);
+        if (!$report || !$report->getPhotoPath()) {
+            return new JsonResponse(['error' => 'Photo not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $filePath = dirname(__DIR__, 2) . '/' . $report->getPhotoPath();
+        if (!file_exists($filePath)) {
+            return new JsonResponse(['error' => 'Photo file not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new Response(
+            file_get_contents($filePath),
+            Response::HTTP_OK,
+            ['Content-Type' => 'image/jpeg']
+        );
     }
 }

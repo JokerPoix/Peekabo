@@ -8,8 +8,10 @@ from flask import Flask, request, jsonify
 from PIL import Image
 import os
 import sys
+import json
 from io import BytesIO
 import logging
+import requests as http_requests
 
 # Add parent directory to path to import model service
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -26,8 +28,11 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
-# Initialize model service (singleton)
-model_service = None
+# Initialize model service eagerly at startup so the model is warm before any request arrives
+logger.info("Initializing model service at startup...")
+model_service = BirdClassificationModelService()
+model_service.load_label_translations()
+logger.info("Model service ready.")
 
 
 def allowed_file(filename: str) -> bool:
@@ -37,10 +42,7 @@ def allowed_file(filename: str) -> bool:
 
 
 def get_model_service() -> BirdClassificationModelService:
-    """Get or create model service instance."""
-    global model_service
-    if model_service is None:
-        model_service = BirdClassificationModelService()
+    """Return the pre-loaded model service instance."""
     return model_service
 
 
@@ -100,7 +102,6 @@ def predict_bird_species_french():
         
         # Get model service and make prediction (French)
         service = get_model_service()
-        service.load_label_translations()  # Ensure translations are loaded
         result = service.get_prediction_result_french(image, top_k=top_k)
         
         logger.info(f"Prediction successful (FR): {result['top_prediction']['species']}")
@@ -141,8 +142,7 @@ def predict_from_url():
             top_k = 3
         
         # Download and open image
-        import requests
-        response = requests.get(url, timeout=10)
+        response = http_requests.get(url, timeout=10)
         response.raise_for_status()
         image = Image.open(BytesIO(response.content))
         
@@ -186,8 +186,6 @@ def get_species_list():
             "error": str(e)
         }), 500
 
-
 if __name__ == '__main__':
-    # Run the Flask app
     app.run(host='0.0.0.0', port=8060, debug=True)
 

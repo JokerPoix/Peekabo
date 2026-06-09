@@ -1,19 +1,245 @@
-# Peekaboo
-## Structure Générale
+# 🐦 Peekaboo — Application de Suivi et d'Observation d'Oiseaux
+
+**Peekaboo** est une plateforme complète de suivi d'oiseaux combinant :
+- **Suivi GPS** via balises IoT pour les oiseaux équipés
+- **Carte collaborative** des observations photo par les utilisateurs
+- **Identification par IA** (reconnaissance d'espèces via modèle ML)
+- **Chat ornithologique** (LLM Ollama) pour descriptions d'espèces
+
+---
+
+## 📋 Table des matières
+
+1. [Architecture globale](#-architecture-globale)
+2. [Services](#-services)
+3. [Prérequis](#-prérequis)
+4. [Installation et démarrage](#-installation-et-démarrage)
+5. [Développement](#-développement)
+6. [Fonctionnalités](#-fonctionnalités)
+7. [API REST](#-api-rest)
+8. [Modèle de données](#-modèle-de-données)
+9. [Structure du projet](#-structure-du-projet)
+
+---
+
+## 🏗 Architecture globale
+
 ```mermaid
 sequenceDiagram
-participant  Web  Interface  Admin
-participant  IoT
-participant  Backend
-participant  FrontEnd (Mobile)
+    participant Web as Interface Web
+    participant IoT as Balise IoT
+    participant Backend as Backend Symfony
+    participant Front as Frontend (React)
+    participant ML as ML Model Service
+    participant LLM as Ollama (LLM)
 
-Backend->>+FrontEnd (Mobile): GPS
-FrontEnd (Mobile)->>+Backend: Action "Perte de l'Oiseau"
-IoT->>+Backend: GPS
-Web  Interface  Admin->>+Backend: Accès Gestion
+    Note over IoT,Backend: Suivi GPS en temps réel
+    IoT->>+Backend: Envoi position GPS
+    Backend-->>Front: Transmission position
+
+    Note over Front,ML: Identification photo
+    Front->>+Backend: Envoi photo + localisation
+    Backend->>+ML: Classification image
+    ML-->>-Backend: Espèce prédite + score
+    Backend-->>Front: Résultat + stockage rapport
+    Front->>+LLM: Demande description espèce
+    LLM-->>-Front: Description textuelle
+
+    Note over Backend: Stocke dans bird_reports<br/>(photo, espèce, position, utilisateur)
 ```
 
-## Modélisation des données
+### Flux Docker
+
+```
+┌───────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│  Frontend     │────▶│  Backend Symfony │────▶│  PostgreSQL      │
+│  React/Vite   │     │  PHP 8.1 Apache  │     │                  │
+│  Port 8010    │     │  Port 8000       │     │  Port 5435       │
+└───────┬───────┘     └────────┬─────────┘     └──────────────────┘
+        │                      │
+        │                      ▼
+        │              ┌──────────────────┐     ┌──────────────────┐
+        │              │  ML Model Flask  │     │  Ollama LLM      │
+        └──────────────│  Port 8060       │     │  Port 11434      │
+                       └──────────────────┘     └──────────────────┘
+```
+
+---
+
+## 🧩 Services
+
+| Service | Technologie | Port | Rôle |
+|---|---|---|---|
+| **Frontend** | React 18 + TypeScript + Vite | `8010` | Interface utilisateur, carte Leaflet, upload photo |
+| **Backend** | Symfony 6 + PHP 8.1 Apache | `8000` | API REST, authentification JWT, base de données |
+| **Base de données** | PostgreSQL 14 | `5435` | Stockage des données (oiseaux, utilisateurs, localisations) |
+| **ML Model** | Python Flask | `8060` | Classification d'espèces par image |
+| **Ollama LLM** | llama3.2:3b | `11434` | Génération de descriptions ornithologiques |
+| **Mover** | Python script | — | Simulateur IoT : envoie des positions GPS à intervalle régulier |
+
+---
+
+## 📦 Prérequis
+
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/)
+- **8 Go de RAM minimum** (Ollama + models)
+- **Node.js 22** (si développement frontend hors Docker)
+
+---
+
+## 🚀 Installation et démarrage
+
+### 1. Cloner le projet
+
+```bash
+git clone <url-du-repo> Peekabo
+cd Peekabo/peekaboback
+```
+
+### 2. Lancer tous les services
+
+```bash
+docker compose up --build -d
+```
+
+Cela démarre les 6 services : `front`, `app`, `db`, `peekaboo_class_model_service`, `ollama`, `mover`.
+
+### 3. Vérifier que tout fonctionne
+
+```bash
+# Statut des conteneurs
+docker compose ps
+
+# Logs du backend
+docker compose logs app
+
+# Logs du frontend
+docker compose logs front
+```
+
+### 4. Accéder à l'application
+
+| Interface | URL |
+|---|---|
+| **Frontend** | [http://localhost:8010](http://localhost:8010) |
+| **API Backend** | [http://localhost:8000](http://localhost:8000) |
+
+### 5. Migrations et fixtures
+
+Les migrations et fixtures s'exécutent automatiquement au démarrage du conteneur Symfony via `docker/init.sh`. Pour les relancer manuellement :
+
+```bash
+docker compose exec app php bin/console doctrine:migrations:migrate
+docker compose exec app php bin/console doctrine:fixtures:load
+```
+
+---
+
+## 🛠 Développement
+
+### Frontend (React + Vite)
+
+```bash
+cd peekabofront
+npm install
+npm run dev
+```
+
+Le frontend est accessible sur `http://localhost:8010`.  
+Toutes les requêtes API (`/predict`, `/bird_reports`, `/llm`, etc.) sont proxyfiées vers le backend Symfony via `vite.config.ts`.
+
+### Backend (Symfony)
+
+```bash
+docker compose exec app bash
+php bin/console cache:clear
+php bin/console debug:router  # liste les routes disponibles
+```
+
+### Modèle ML
+
+```bash
+# Logs du service de classification
+docker compose logs peekaboo_class_model_service
+```
+
+---
+
+## ✨ Fonctionnalités
+
+### 🗺 Carte interactive (Leaflet)
+
+- **Suivi GPS** des oiseaux équipés de balises (position en temps réel, historique du trajet)
+- **Signalements collaboratifs** : points rouges sur la carte pour les observations photo des utilisateurs
+- Popup avec : espèce, horaire, photo miniature, email du contributeur
+
+### 📷 Identification par photo
+
+1. Charger une photo d'oiseau
+2. Le backend transmet l'image au service ML (Python/Flask)
+3. Le modèle retourne l'espèce avec un score de confiance
+4. **Si confiance < 30 %** → affiche "Oiseau Non reconnu" (aucun signalement stocké)
+5. **Si confiance ≥ 30 %** → stocke le signalement avec photo et localisation GPS
+6. Une description de l'espèce est générée via Ollama (LLM)
+
+### 🤖 Chat ornithologique
+
+Assistant IA spécialisé en ornithologie, basé sur Ollama (llama3.2:3b), accessible depuis la page Chat.
+
+### 📋 Listes dépliantes
+
+- **Liste des oiseaux** : oiseaux suivis avec leurs positions
+- **Signalements** : toutes les observations photo avec miniature, espèce et horaire
+
+---
+
+## 🌐 API REST
+
+### Authentification
+
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/login` | Authentification utilisateur (retourne un JWT) |
+| POST | `/register` | Création de compte |
+
+### Oiseaux
+
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/birds` | Liste de tous les oiseaux |
+| GET | `/user/birds` | Oiseaux de l'utilisateur connecté |
+
+### Localisations
+
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/bird/{gpsId}/locations` | Envoi de positions GPS (IoT) |
+| GET | `/bird/{id}/location` | Dernière position d'un oiseau |
+| GET | `/bird/{id}/path` | Historique complet des positions |
+
+### Signalements collaboratifs
+
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/predict` | Classification photo + stockage signalement |
+| GET | `/bird_reports` | Liste de tous les signalements |
+| GET | `/bird_report/{id}/photo` | Photo du signalement |
+
+### IA
+
+| Méthode | Route | Description |
+|---|---|---|
+| POST | `/llm/get-chat-birds/` | Description ornithologique (SSE stream) |
+| POST | `/llm/chat` | Chat généraliste (SSE stream) |
+
+### Proxy Vite (dev)
+
+Le `vite.config.ts` proxyfie les routes suivantes vers le backend Symfony :
+`/predict`, `/bird_reports`, `/bird/`, `/birds`, `/llm`, `/user`, `/login`, `/register`, `/bird_report/`
+
+---
+
+## 💾 Modèle de données
 
 ```mermaid
 classDiagram
@@ -22,26 +248,13 @@ classDiagram
         +string email
         +string password
         +array roles
-        +getId(): int
-        +getEmail(): string
-        +setEmail(email: string): self
-        +getPassword(): string
-        +setPassword(password: string): self
-        +getRoles(): array
-        +setRoles(roles: array): self
     }
 
     class Bird {
         +int id
         +string name
         +string gpsId
-        +getId(): int
-        +getName(): string
-        +setName(name: string): self
-        +getGpsId(): string
-        +setGpsId(gpsId: string): self
         +getOwner(): User
-        +setOwner(owner: User): self
     }
 
     class LocationHistory {
@@ -49,391 +262,99 @@ classDiagram
         +float latitude
         +float longitude
         +DateTime timestamp
-        +getId(): int
-        +getLatitude(): float
-        +setLatitude(latitude: float): self
-        +getLongitude(): float
-        +setLongitude(longitude: float): self
-        +getTimestamp(): DateTime
-        +setTimestamp(timestamp: DateTime): self
         +getBird(): Bird
-        +setBird(bird: Bird): self
+    }
+
+    class BirdReport {
+        +string id (UUID)
+        +string species
+        +float latitude
+        +float longitude
+        +DateTime timestamp
+        +string? photoPath
+        +getUser(): ?User
     }
 
     User "1" -- "0..*" Bird : owns
     Bird "1" -- "0..*" LocationHistory : has
-
-```
-## Fonctions Principales
-
-### Création du profil et Suivi de l'oiseau GPS
-
-```mermaid
-sequenceDiagram
-participant  Web  Interface  Pro
-participant  IoT
-participant  Backend
-participant  FrontEnd (Mobile)
-
-
-Web  Interface  Pro->>+Backend: Vétérinaire inscris l'oiseau
-Backend-->>Backend: Création de la bague, QR Code et Compte
-FrontEnd (Mobile)->>+Backend: Activation de la bague par le propriétaire de l'oiseau
-Backend-->>IoT: Activation de la bague par le propriétaire de l'oiseau
-IoT->>+Backend: GPS
-Backend-->>FrontEnd (Mobile): GPS
+    User "1" -- "0..*" BirdReport : submits
 ```
 
-### Perte de l'Oiseau
-```mermaid
-sequenceDiagram
-participant  Web  Interface  Pro
-participant  FrontEnd (Mobile)
-participant  Backend
-participant  IoT
-participant  User Lambda
+### Entités
 
-FrontEnd (Mobile)->>+Backend: Action "Perte de l'Oiseau"
-Backend-->>FrontEnd (Mobile): GPS
-IoT-->>Backend: GPS
-User Lambda->>+IoT: Scan du Flashcode
-IoT-->>User Lambda: Infos / Coordonées Véténinaire Oiseau
-IoT-->>FrontEnd (Mobile): Notifcation de scan du QR Code ??
-Web  Interface  Pro->>+Backend: Accède au Profil du propriétaire de l'oiseau
-Backend-->>FrontEnd (Mobile): Avertie le propriétaire de l'oiseau
+| Entité | Table | Description |
+|---|---|---|
+| **User** | `users` | Utilisateurs (propriétaires d'oiseaux) |
+| **Bird** | `birds` | Oiseaux suivis, avec `gps_id` pour la balise IoT |
+| **LocationHistory** | `location_history` | Points GPS reçus des balises |
+| **BirdReport** | `bird_reports` | Signalements photo collaboratifs (UUID, espèce, position, photo) |
+
+---
+
+## 📁 Structure du projet
+
 ```
-Le Vétérinaire appelle l'utilisateur ou notification sur le QR Code lors du scan par l'User Lambda.
-L' utlisateur va récupérer son oiseau.
-
-### Specifications API (Généré par gpt4o)
-
-```yaml
-openapi: "3.0.0"
-info:
-  title: Bird Tracking API
-  version: "1.0.0"
-  description: API for managing birds, their location histories, and user authentication.
-servers:
-  - url: http://localhost
-
-paths:
-  /birds:
-    get:
-      summary: Get All Birds
-      description: Retrieves a list of all birds.
-      responses:
-        "200":
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Bird'
-
-  /user/{userId}/birds:
-    get:
-      summary: Get Birds for a Specific User
-      description: Retrieves all birds owned by a given user.
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: List of birds for the user.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Bird'
-        "404":
-          description: User not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "User not found"
-
-  /bird/{gpsId}/locations:
-    post:
-      summary: Update Bird Locations
-      description: Updates the location of a bird identified by its GPS ID.
-      parameters:
-        - name: gpsId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: An object containing an array of location updates.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - locations
-              properties:
-                locations:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/LocationUpdate'
-      responses:
-        "200":
-          description: Locations updated successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Locations updated successfully"
-        "400":
-          description: Invalid payload.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid payload"
-        "404":
-          description: Bird not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Bird not found"
-
-  /bird/{id}/location:
-    get:
-      summary: Get Last Location of a Bird
-      description: Retrieves the most recent location for the specified bird.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Last location found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Location'
-        "404":
-          description: Bird or location history not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Bird not found"  # or "No location history found for this bird"
-
-  /bird/{id}/path:
-    get:
-      summary: Get Bird's Path (Location History)
-      description: Retrieves the complete ordered location history for a specified bird.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Location history retrieved successfully.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Location'
-        "404":
-          description: Bird not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Bird not found"
-
-  /login:
-    post:
-      summary: User Login
-      description: Authenticates a user and returns a JWT token.
-      requestBody:
-        description: User credentials.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  example: "user@example.com"
-                password:
-                  type: string
-                  example: "yourpassword"
-      responses:
-        "200":
-          description: Login successful.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-        "401":
-          description: Invalid credentials.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Invalid credentials"
-
-  /register:
-    post:
-      summary: User Registration
-      description: Registers a new user.
-      requestBody:
-        description: User registration data.
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  example: "user@example.com"
-                password:
-                  type: string
-                  example: "yourpassword"
-      responses:
-        "201":
-          description: User registered successfully.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "User registered successfully"
-        "400":
-          description: Missing email or password.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Email and password are required"
-
-components:
-  schemas:
-    Bird:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: "Sparrow"
-        latitude:
-          type: number
-          format: float
-          example: 40.7128
-        longitude:
-          type: number
-          format: float
-          example: -74.0060
-        owner:
-          type: string
-          description: Username of the bird owner.
-          example: "user@example.com"
-        gps_id:
-          type: string
-          example: "ABC123"
-    Location:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: float
-          example: 40.7128
-        longitude:
-          type: number
-          format: float
-          example: -74.0060
-        timestamp:
-          type: string
-          format: date-time
-          example: "2025-03-31 12:34:56"
-    LocationUpdate:
-      type: object
-      properties:
-        latitude:
-          type: number
-          format: float
-          example: 40.7128
-        longitude:
-          type: number
-          format: float
-          example: -74.0060
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        email:
-          type: string
-          example: "user@example.com"
-        password:
-          type: string
-          description: Hashed password.
-          example: "$2y$10$..."
-        roles:
-          type: array
-          items:
-            type: string
-          example:
-            - "ROLE_USER"
+Peekabo/
+├── peekaboback/              # Backend Symfony (PHP 8.1)
+│   ├── config/               # Configuration Symfony
+│   ├── docker/               # Script init.sh (démarrage conteneur)
+│   ├── migrations/           # Migrations Doctrine
+│   ├── src/
+│   │   ├── Controller/       # Contrôleurs (Classification, Bird, ...)
+│   │   ├── Entity/           # Entités Doctrine (Bird, BirdReport, User...)
+│   │   └── Repository/       # Repositories Doctrine
+│   ├── public/               # Web root (Apache)
+│   ├── var/                  # Cache, logs, uploads photos
+│   ├── docker-compose.yml    # Orchestration complète
+│   └── Dockerfile
+│
+├── peekabofront/             # Frontend React + Vite
+│   ├── src/
+│   │   ├── components/       # Composants (BirdList, BirdReportsList)
+│   │   ├── pages/            # Pages (Camera, Map, Chat, Auth...)
+│   │   ├── api/              # Types générés
+│   │   └── auth/             # Contexte d'authentification
+│   ├── vite.config.ts        # Configuration Vite + proxy
+│   └── Dockerfile.front
+│
+├── peekaboo_class_model_service/  # Service ML Python Flask
+├── ollama/                   # Script d'initialisation Ollama
+├── ollama-data/              # Données persistantes Ollama
+└── python/                   # Scripts Python auxiliaires
 ```
 
+---
 
+## 🔧 Commandes utiles
 
+```bash
+# Reconstruire et relancer tous les services
+docker compose up --build -d
 
+# Voir les logs d'un service
+docker compose logs -f front app db
+
+# Exécuter une commande dans un conteneur
+docker compose exec app bash
+docker compose exec front sh
+
+# Appliquer les migrations
+docker compose exec app php bin/console doctrine:migrations:migrate
+
+# Vider le cache Symfony
+docker compose exec app php bin/console cache:clear
+
+# Arrêter tous les services
+docker compose down
+
+# Supprimer les volumes (perte de données)
+docker compose down -v
+```
+
+---
+
+## 📄 Documents complémentaires
+
+- [Spécification API détaillée](./2326-07_specification_api_Peekaboo.md)
+- [Fonctions principales](./2326-07_peekaboo_fonctions_principales.md)
+- [Modélisation des données](./2326-07_peekaboo_modelisation_donnees.md)
