@@ -6,11 +6,28 @@ import { getBirdIdLocation, getBirdIdPath } from '../api/default';
 import type { Bird, Location } from '../api/peekaboo_methods.schemas';
 import birdIconMap from '../assets/img/bird_icon_map.png';
 
+interface BirdReport {
+  id: string;
+  species: string;
+  latitude: number;
+  longitude: number;
+  timestamp: string;
+  user_email: string | null;
+}
+
 const myIcon = L.icon({
   iconUrl: birdIconMap,
   iconSize: [95, 95],
   iconAnchor: [50, 70],
   popupAnchor: [0, -76],
+});
+
+const reportIcon = L.divIcon({
+  className: 'bird-report-marker',
+  html: '<div style="background:#e74c3c;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);">&#x1F426;</div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -20],
 });
 
 const BirdLocationPage: React.FC = () => {
@@ -21,11 +38,14 @@ const BirdLocationPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [hasPath, setHasPath] = useState(false);
 
+  const [birdReports, setBirdReports] = useState<BirdReport[]>([]);
+
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const reportLayerRef = useRef<L.LayerGroup | null>(null);
 
   const fetchBirdLocation = useCallback(async (birdId: number) => {
     setLoading(true);
@@ -84,6 +104,48 @@ const BirdLocationPage: React.FC = () => {
       setLoading(false);
     }
   }, [birdLocation]);
+
+  const fetchBirdReports = useCallback(async () => {
+    try {
+      const response = await fetch('/bird_reports');
+      if (response.ok) {
+        const data: BirdReport[] = await response.json();
+        setBirdReports(data);
+      }
+    } catch {
+      // Reports are non-critical, fail silently
+    }
+  }, []);
+
+  const renderReportMarkers = useCallback((reports: BirdReport[]) => {
+    if (!mapRef.current) return;
+
+    if (!reportLayerRef.current) {
+      reportLayerRef.current = L.layerGroup().addTo(mapRef.current);
+    }
+    reportLayerRef.current.clearLayers();
+
+    reports.forEach((report) => {
+      const time = report.timestamp.split(' ')[1]?.substring(0, 5) || '';
+      const popupContent = `
+        <div style="font-family:sans-serif;min-width:140px;">
+          <strong style="color:#e74c3c;">${report.species}</strong><br/>
+          <span style="font-size:12px;color:#666;">${time}</span>
+        </div>
+      `;
+      const marker = L.marker([report.latitude, report.longitude], { icon: reportIcon })
+        .bindPopup(popupContent);
+      reportLayerRef.current?.addLayer(marker);
+    });
+  }, []);
+
+  useEffect(() => {
+    fetchBirdReports();
+  }, [fetchBirdReports]);
+
+  useEffect(() => {
+    renderReportMarkers(birdReports);
+  }, [birdReports, renderReportMarkers]);
 
   const handleBirdSelected = useCallback(
     (bird: Bird | null) => {
@@ -200,10 +262,6 @@ const BirdLocationPage: React.FC = () => {
     }
   };
 
-  const birdTitle = selectedBird
-    ? `${selectedBird.name}'s Location`
-    : 'Bird Location Tracker';
-
   return (
     <div>
       <div className="menu">
@@ -217,6 +275,12 @@ const BirdLocationPage: React.FC = () => {
       )}
 
       {error && <div className="error-message">{error}</div>}
+
+      {birdReports.length > 0 && (
+        <div style={{ fontSize: '13px', color: '#555', margin: '8px 0', padding: '8px', background: '#fff3f3', borderRadius: '6px', border: '1px solid #f5c6cb' }}>
+          <strong>Signalements oiseaux :</strong> {birdReports.length} point{birdReports.length > 1 ? 's' : ''} sur la carte
+        </div>
+      )}
 
       <div ref={mapContainerRef} style={{ height: '400px', width: '100%', marginTop: '20px' }}></div>
 

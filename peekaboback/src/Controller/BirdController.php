@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Bird;
+use App\Entity\BirdReport;
 use App\Entity\LocationHistory;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -148,6 +149,29 @@ class BirdController extends AbstractController
                 'timestamp' => $location->getTimestamp()->format('Y-m-d H:i:s'),
             ];
         }, $locations);
+
+        return $this->json($response);
+    }
+
+    #[Route('/bird_reports', name: 'get_bird_reports', methods: ['GET'])]
+    public function getBirdReports(): JsonResponse
+    {
+        $reports = $this->entityManager->getRepository(BirdReport::class)->findBy(
+            [],
+            ['timestamp' => 'DESC']
+        );
+        error_log("[Peekaboo] getBirdReports: count=" . count($reports));
+
+        $response = array_map(function (BirdReport $report) {
+            return [
+                'id' => $report->getId(),
+                'species' => $report->getSpecies(),
+                'latitude' => $report->getLatitude(),
+                'longitude' => $report->getLongitude(),
+                'timestamp' => $report->getTimestamp()->format('Y-m-d H:i:s'),
+                'user_email' => $report->getUser()?->getEmail(),
+            ];
+        }, $reports);
 
         return $this->json($response);
     }

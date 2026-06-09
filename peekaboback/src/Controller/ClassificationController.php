@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\BirdReport;
+use App\Entity\User;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +21,14 @@ class ClassificationController extends AbstractController
     private string $ollamaBaseUrl;
     private string $ollamaModel;
     private HttpClientInterface $httpClient;
+    private EntityManagerInterface $entityManager;
 
     private static array $chatSessions = [];
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, EntityManagerInterface $entityManager)
     {
         $this->httpClient = $httpClient;
+        $this->entityManager = $entityManager;
         $this->serviceUrl = (string) getenv('CLASS_MODEL_SRV_URL') ?: 'http://peekaboo_class_model_service:8060';
         $this->ollamaBaseUrl = (string) getenv('OLLAMA_BASE_URL') ?: 'http://ollama:11434';
         $this->ollamaModel = (string) getenv('OLLAMA_MODEL') ?: 'llama3.2:3b';
@@ -46,6 +51,10 @@ class ClassificationController extends AbstractController
         if ($topK < 1 || $topK > 10) {
             $topK = 3;
         }
+
+        $latitude = $request->request->get('latitude');
+        $longitude = $request->request->get('longitude');
+        error_log("[Peekaboo] predict: latitude=$latitude longitude=$longitude");
 
         $ch = curl_init($this->serviceUrl . '/predict');
         if ($ch === false) {
@@ -72,6 +81,36 @@ class ClassificationController extends AbstractController
                 'success' => false,
                 'error'   => 'Classification service error: ' . $error,
             ], Response::HTTP_BAD_GATEWAY);
+        }
+
+        // Store bird report if location data was provided
+        if ($latitude !== null && $longitude !== null) {
+            $mlResponse = json_decode($body, true);
+            $species = $mlResponse['top_prediction']['species'] ?? null;
+            error_log("[Peekaboo] predict: species=" . ($species ?? 'null') . " top_prediction keys=" . json_encode(array_keys($mlResponse['top_prediction'] ?? [])));
+
+            if ($species !== null) {
+                $report = new BirdReport();
+                $report->setSpecies($species);
+                $report->setLatitude((float) $latitude);
+                $report->setLongitude((float) $longitude);
+                $report->setTimestamp(new \DateTime());
+
+                // Associate authenticated user if available
+                $user = $this->getUser();
+                if ($user instanceof User) {
+                    $report->setUser($user);
+                }
+
+                $this->entityManager->persist($report);
+                $this->entityManager->flush();
+                error_log("[Peekaboo] predict: BirdReport stored id=" . $report->getId());
+
+                // Augment response with report metadata
+                $responseData = json_decode($body, true);
+                $responseData['report_id'] = $report->getId();
+                return new JsonResponse($responseData, $httpCode);
+            }
         }
 
         return new Response($body, $httpCode, ['Content-Type' => 'application/json']);

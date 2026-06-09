@@ -22,6 +22,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      '/bird_reports': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
+      },
       '/llm': {
         target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
@@ -32,7 +37,7 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/bird': {
+      '/bird/': {
         target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false

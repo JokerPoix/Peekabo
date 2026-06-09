@@ -88,6 +88,19 @@ const CameraClassificationPage: React.FC = () => {
       formData.append('image', blob, 'image.jpg');
       formData.append('top_k', String(topK));
 
+      // Try to get user location for collaborative bird report
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject);
+        });
+        formData.append('latitude', String(pos.coords.latitude));
+        formData.append('longitude', String(pos.coords.longitude));
+        console.log('[Peekaboo] Geolocation OK:', pos.coords.latitude, pos.coords.longitude);
+      } catch (err) {
+        console.log('[Peekaboo] Geolocation FAILED:', err instanceof Error ? err.message : String(err));
+        alert('Unable to retrieve your location. Please check your browser settings.');
+      }
+
       const response = await fetch('/predict', {
         method: 'POST',
         body: formData,
