@@ -51,9 +51,11 @@ services:
       - ../peekabofront:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://app:80
+      - PORT=8010
     depends_on:
       - app
+#    networks:
+#      - peekaboo_network
 
   # Ollama Service
   ollama:
@@ -82,3 +84,6 @@ services:
 volumes:
   postgres_data:
 
+#networks:
+#  peekaboo_network:
+#    driver: bridge
