@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 const CameraClassificationPage: React.FC = () => {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
@@ -126,20 +126,33 @@ const CameraClassificationPage: React.FC = () => {
   };
 
   return (
-    <div>
-      <input type="file" accept="image/*" onChange={onFileChange} />
-      <input
-        type="number"
-        min={1}
-        max={10}
-        placeholder="Top K (default 3)"
-        value={topK}
-        onChange={(e) => setTopK(parseInt(e.target.value, 10))}
-      />
-      <button onClick={sendToApi} disabled={!imageBase64 || loading}>
-        Envoyer
+    <div className="camera-container">
+      {/* Upload zone */}
+      <label className="camera-upload">
+        <div className="camera-upload-icon">&#x1F4F7;</div>
+        <div>{imageBase64 ? 'Image sélectionnée' : 'Choisir une photo'}</div>
+        <input type="file" accept="image/*" onChange={onFileChange} />
+      </label>
+
+      {imageBase64 && (
+        <img src={imageBase64} alt="Aperçu" className="camera-preview" />
+      )}
+
+
+      {/* Send button */}
+      <button className="camera-btn" onClick={sendToApi} disabled={!imageBase64 || loading}>
+        {loading ? 'Analyse en cours...' : 'Envoyer'}
       </button>
-      {loading && <div>Analyse en cours...</div>}
+
+      {/* Loading spinner */}
+      {loading && (
+        <div className="camera-loading">
+          <div className="camera-spinner"></div>
+          Classification en cours...
+        </div>
+      )}
+
+      {/* Prediction result */}
       {topPrediction && (
         <div className="prediction-result">
           <h3>Espèce prédite :</h3>
@@ -154,7 +167,9 @@ const CameraClassificationPage: React.FC = () => {
           )}
         </div>
       )}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+
+      {/* Error */}
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

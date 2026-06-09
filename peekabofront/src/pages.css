@@ -125,6 +125,126 @@
   color: #333;
 }
 
+/* ── Camera Page ── */
+.camera-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.camera-upload {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 160px;
+  border: 2px dashed #ffd000;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fffde7;
+  transition: all 0.25s ease;
+  color: #b8860b;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.camera-upload:hover {
+  background: #fff8dc;
+  border-color: #e6b800;
+}
+
+.camera-upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.camera-upload-icon {
+  font-size: 36px;
+}
+
+.camera-preview {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.camera-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.camera-input:focus {
+  border-color: #ffd000;
+}
+
+.camera-btn {
+  width: 100%;
+  max-width: 360px;
+  padding: 14px;
+  background: #ffd000;
+  color: #333;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(255, 208, 0, 0.3);
+}
+
+.camera-btn:hover:not(:disabled) {
+  background: #e6b800;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(255, 208, 0, 0.4);
+}
+
+.camera-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.camera-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.camera-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #888;
+  font-size: 14px;
+}
+
+.camera-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #ffd000;
+  border-radius: 50%;
+  animation: camera-spin 0.6s linear infinite;
+}
+
+@keyframes camera-spin {
+  to { transform: rotate(360deg); }
+}
+
 .loading-state,
 .error-message {
   text-align: center;

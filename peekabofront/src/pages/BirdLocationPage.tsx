@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import BirdList from '../components/BirdList';
+import BirdReportsList from '../components/BirdReportsList';
 import { getBirdIdLocation, getBirdIdPath } from '../api/default';
 import type { Bird, Location } from '../api/peekaboo_methods.schemas';
 import birdIconMap from '../assets/img/bird_icon_map.png';
@@ -40,6 +41,8 @@ const BirdLocationPage: React.FC = () => {
   const [hasPath, setHasPath] = useState(false);
 
   const [birdReports, setBirdReports] = useState<BirdReport[]>([]);
+  const [showBirdList, setShowBirdList] = useState(false);
+  const [showBirdReports, setShowBirdReports] = useState(false);
 
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
@@ -248,6 +251,12 @@ const BirdLocationPage: React.FC = () => {
     }
   };
 
+  const handleReportClick = useCallback((lat: number, lng: number) => {
+    if (mapRef.current) {
+      mapRef.current.setView([lat, lng], 15);
+    }
+  }, []);
+
   const getUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -267,27 +276,53 @@ const BirdLocationPage: React.FC = () => {
     }
   };
 
+  const collapsibleBtnStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '12px 16px',
+    border: 'none',
+    background: '#ffd000',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: 700,
+    color: '#333',
+    textAlign: 'left',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    transition: 'background 0.2s',
+  };
+
+  const collapsibleContentStyle: React.CSSProperties = {
+    borderBottom: '1px solid #e0e0e0',
+  };
+
   return (
     <div>
-      <div className="menu">
-        <BirdList onBirdSelected={handleBirdSelected} />
+      {/* Map controls */}
+      <div style={{ padding: '8px 0', display: 'flex', gap: '8px' }}>
+        <button
+          onClick={getUserLocation}
+          style={{
+            background: '#ffd000',
+            color: '#333',
+            border: 'none',
+            borderRadius: '12px',
+            padding: '10px 20px',
+            fontWeight: 700,
+            fontSize: '14px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 6px rgba(255, 208, 0, 0.3)',
+            transition: 'all 0.2s',
+          }}
+        >
+          Ma Position
+        </button>
       </div>
 
-      {selectedBird && intervalRef.current && (
-        <div className="update-indicator">
-          <span className="update-dot"></span> Updating location every 10 seconds
-        </div>
-      )}
+      {/* Map on TOP */}
+      <div ref={mapContainerRef} style={{ height: '400px', width: '100%' }}></div>
 
       {error && <div className="error-message">{error}</div>}
-
-      {birdReports.length > 0 && (
-        <div style={{ fontSize: '13px', color: '#555', margin: '8px 0', padding: '8px', background: '#fff3f3', borderRadius: '6px', border: '1px solid #f5c6cb' }}>
-          <strong>Signalements oiseaux :</strong> {birdReports.length} point{birdReports.length > 1 ? 's' : ''} sur la carte
-        </div>
-      )}
-
-      <div ref={mapContainerRef} style={{ height: '400px', width: '100%', marginTop: '20px' }}></div>
 
       {selectedBird && (
         <div className="bird-details">
@@ -297,11 +332,44 @@ const BirdLocationPage: React.FC = () => {
           <p><strong>Propriétaire :</strong> {selectedBird.owner}</p>
           <p><strong>Position actuelle :</strong> {birdLocation.latitude.toFixed(6)}, {birdLocation.longitude.toFixed(6)}</p>
           {hasPath && <p><strong>Nombre de points du trajet :</strong> {birdPath.length}</p>}
+          {selectedBird && intervalRef.current && (
+            <div className="update-indicator">
+              <span className="update-dot"></span> Updating location every 10 seconds
+            </div>
+          )}
         </div>
       )}
 
-      <div className="manual-controls">
-        <button onClick={getUserLocation}>Ma Position</button>
+      {/* Collapsible: Bird List */}
+      <div>
+        <button
+          style={collapsibleBtnStyle}
+          onClick={() => setShowBirdList((v) => !v)}
+        >
+          <span>Liste des Oiseaux</span>
+          <span>{showBirdList ? '▲' : '▼'}</span>
+        </button>
+        {showBirdList && (
+          <div style={collapsibleContentStyle}>
+            <BirdList onBirdSelected={handleBirdSelected} />
+          </div>
+        )}
+      </div>
+
+      {/* Collapsible: Bird Reports */}
+      <div>
+        <button
+          style={collapsibleBtnStyle}
+          onClick={() => setShowBirdReports((v) => !v)}
+        >
+          <span>Signalements Oiseaux ({birdReports.length})</span>
+          <span>{showBirdReports ? '▲' : '▼'}</span>
+        </button>
+        {showBirdReports && (
+          <div style={collapsibleContentStyle}>
+            <BirdReportsList reports={birdReports} onReportClick={handleReportClick} />
+          </div>
+        )}
       </div>
     </div>
   );
