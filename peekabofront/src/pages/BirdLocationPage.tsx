@@ -13,6 +13,7 @@ interface BirdReport {
   longitude: number;
   timestamp: string;
   user_email: string | null;
+  photo_url: string | null;
 }
 
 const myIcon = L.icon({
@@ -127,10 +128,14 @@ const BirdLocationPage: React.FC = () => {
 
     reports.forEach((report) => {
       const time = report.timestamp.split(' ')[1]?.substring(0, 5) || '';
+      const photoHtml = report.photo_url
+        ? `<img src="${report.photo_url}" alt="${report.species}" style="width:120px;height:auto;border-radius:4px;margin-top:4px;display:block;" />`
+        : '';
       const popupContent = `
-        <div style="font-family:sans-serif;min-width:140px;">
+        <div style="font-family:sans-serif;min-width:140px;text-align:center;">
           <strong style="color:#e74c3c;">${report.species}</strong><br/>
           <span style="font-size:12px;color:#666;">${time}</span>
+          ${photoHtml}
         </div>
       `;
       const marker = L.marker([report.latitude, report.longitude], { icon: reportIcon })

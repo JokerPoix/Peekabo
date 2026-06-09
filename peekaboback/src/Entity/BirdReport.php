@@ -25,6 +25,9 @@ class BirdReport
     #[ORM\Column(type: "float")]
     private float $longitude;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $photoPath = null;
+
     #[ORM\Column(type: "datetime")]
     private \DateTime $timestamp;
 
@@ -87,6 +90,17 @@ class BirdReport
     public function setLongitude(float $longitude): self
     {
         $this->longitude = $longitude;
+        return $this;
+    }
+
+    public function getPhotoPath(): ?string
+    {
+        return $this->photoPath;
+    }
+
+    public function setPhotoPath(?string $photoPath): self
+    {
+        $this->photoPath = $photoPath;
         return $this;
     }
 

@@ -56,6 +56,11 @@ export default defineConfig({
         target: 'http://peekaboo_symfony:80',
         changeOrigin: true,
         secure: false
+      },
+      '/bird_report/': {
+        target: 'http://peekaboo_symfony:80',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

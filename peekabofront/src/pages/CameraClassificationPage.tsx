@@ -114,7 +114,7 @@ const CameraClassificationPage: React.FC = () => {
       const prediction = data.top_prediction || null;
       setTopPrediction(prediction);
 
-      if (prediction) {
+      if (prediction && prediction.species !== 'Oiseau Non reconnu') {
         fetchBirdDescription(prediction.species);
       }
     } catch (err: unknown) {

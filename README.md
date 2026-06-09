@@ -434,12 +434,3 @@ components:
             - "ROLE_USER"
 ```
 
-
-When a User from frontend send a picture by camera page of a bird, the location of the usermust be sended to the backend for be store in a table called "bird_reports" (UUID, ID User, Bird Species String return by the predition model (like a species_id), lattitude, longitude, tmstp), then when i load the Bird Map i can see this point with the name of the species. Display on the bird point the Hour:minutes of the stored tmstp and the bird species id.
-
-The /predict behaviour must be the same just in addition the backend must stored the USSer Data and the species returned by the MLModelService and the map of Frontend must keep his logic but display thebird reports too now
-
-THis feature purpose a collaborative map for bird species allow the user to see others users bird photo location and bird caracteristics. 
-
-FrontEnd --/predict--> Backend ----> ML Model Service 
-ML Model Service --Response--> Backend --Store User data and specie returend by the ML Service --> table bird_reports 

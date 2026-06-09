@@ -83,34 +83,56 @@ class ClassificationController extends AbstractController
             ], Response::HTTP_BAD_GATEWAY);
         }
 
-        // Store bird report if location data was provided
-        if ($latitude !== null && $longitude !== null) {
-            $mlResponse = json_decode($body, true);
-            $species = $mlResponse['top_prediction']['species'] ?? null;
-            error_log("[Peekaboo] predict: species=" . ($species ?? 'null') . " top_prediction keys=" . json_encode(array_keys($mlResponse['top_prediction'] ?? [])));
+        // Parse ML response
+        $mlResponse = json_decode($body, true);
+        $species = $mlResponse['top_prediction']['species'] ?? null;
+        $confidence = $mlResponse['top_prediction']['confidence'] ?? null;
+        error_log("[Peekaboo] predict: species=" . ($species ?? 'null') . " confidence=" . ($confidence ?? 'null'));
 
-            if ($species !== null) {
-                $report = new BirdReport();
-                $report->setSpecies($species);
-                $report->setLatitude((float) $latitude);
-                $report->setLongitude((float) $longitude);
-                $report->setTimestamp(new \DateTime());
+        // Reject predictions with confidence below 0.3
+        if ($confidence !== null && $confidence < 0.3) {
+            return new JsonResponse([
+                'top_prediction' => [
+                    'species'    => 'Oiseau Non reconnu',
+                    'confidence' => $confidence,
+                ],
+            ]);
+        }
 
-                // Associate authenticated user if available
-                $user = $this->getUser();
-                if ($user instanceof User) {
-                    $report->setUser($user);
-                }
+        // Store bird report if location data was provided and prediction is valid
+        if ($latitude !== null && $longitude !== null && $species !== null) {
+            $report = new BirdReport();
+            $report->setSpecies($species);
+            $report->setLatitude((float) $latitude);
+            $report->setLongitude((float) $longitude);
+            $report->setTimestamp(new \DateTime());
 
-                $this->entityManager->persist($report);
-                $this->entityManager->flush();
-                error_log("[Peekaboo] predict: BirdReport stored id=" . $report->getId());
-
-                // Augment response with report metadata
-                $responseData = json_decode($body, true);
-                $responseData['report_id'] = $report->getId();
-                return new JsonResponse($responseData, $httpCode);
+            // Associate authenticated user if available
+            $user = $this->getUser();
+            if ($user instanceof User) {
+                $report->setUser($user);
             }
+
+            $this->entityManager->persist($report);
+            $this->entityManager->flush();
+            error_log("[Peekaboo] predict: BirdReport stored id=" . $report->getId());
+
+            // Save the uploaded image to var/uploads/reports/ (writable directory)
+            $uploadDir = dirname(__DIR__, 2) . '/var/uploads/reports/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0775, true);
+            }
+            $ext = strtolower(pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION) ?: 'jpg');
+            if ($ext === 'jpeg') $ext = 'jpg';
+            $photoFilename = $report->getId() . '.' . $ext;
+            $file->move($uploadDir, $photoFilename);
+            $report->setPhotoPath('var/uploads/reports/' . $photoFilename);
+            $this->entityManager->flush();
+
+            // Augment response with report metadata
+            $responseData = $mlResponse;
+            $responseData['report_id'] = $report->getId();
+            return new JsonResponse($responseData, $httpCode);
         }
 
         return new Response($body, $httpCode, ['Content-Type' => 'application/json']);
